@@ -11,11 +11,18 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using System.Drawing;
+using System.Threading;
 
 namespace Finder
 {
     public partial class Form1 : Form
     {
+        public delegate void GrayScale(Image<Rgb, Byte> input);
+        public delegate void UpdateImage();
+        UMat uimage, cannyEdges;
+        public List<RotatedRect> boxList;
+        int count = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -30,41 +37,200 @@ namespace Finder
                 textBox1.Text = name;
                 Bitmap bm = new Bitmap(name);
                 pictureBox1.Image = bm;
-                Image<Rgb, Byte> img = new Image<Rgb, Byte>((Bitmap)(pictureBox1.Image));
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Image<Rgb, Byte> img = new Image<Rgb, Byte>((Bitmap)(pictureBox1.Image));
+            progressBar1.Maximum = 6;
+            progressBar1.Value = 0;
+            
+            label1.Text = "Loading image...";
+            ImageProcesser ip = new ImageProcesser((Bitmap)(pictureBox1.Image));
+            progressBar1.Increment(1);
 
+            label1.Text = "Convert the image to grayscale and filter out the noise";
             //Convert the image to grayscale and filter out the noise
-            UMat uimage = new UMat();
-            CvInvoke.CvtColor(img, uimage, ColorConversion.Bgr2Gray);
+            Thread c2g = new Thread(ip.Convert2Grayscale);
+            c2g.Start();
+            c2g.Join();
+            progressBar1.Increment(1);
 
+            label1.Text = "use image pyr to remove noise";
             //use image pyr to remove noise
+            Thread rmnoise = new Thread(ip.RemoveNoiseByPyr);
+            rmnoise.Start();
+            rmnoise.Join();
+            progressBar1.Increment(1);
+
+            label1.Text = "Canny and edge detection";
+            Thread canny = new Thread(ip.CannyEdgeDetection);
+            canny.Start();
+            canny.Join();
+            progressBar1.Increment(1);
+            pictureBox2.Image = ip.cannyEdges.Bitmap;
+
+            label1.Text = "Find rectangles";
+            Thread findRect = new Thread(ip.FindRectangle);
+            findRect.Start();
+            findRect.Join();
+            progressBar1.Increment(1);
+
+            label1.Text = "Draw rectangles";
+            #region draw rectangles
+            List<RotatedRect> boxList = ip.boxList;
+            Image<Rgb, Byte> img = ip.img;
+            foreach (RotatedRect box in boxList)
+                img.Draw(box, new Rgb(Color.DarkOrange), 2);
+            pictureBox1.Image = img.Bitmap;
+            #endregion
+            progressBar1.Increment(1);
+            label1.Text = "Finished!";
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            //pictureBox1.Height = this.Height;
+            //pictureBox1.Width = this.Width;
+        }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            progressBar1.Maximum = 3;
+            progressBar1.Value = 0;
+
+            label1.Text = "Loading image...";
+            ImageProcesser ip = new ImageProcesser((Bitmap)(pictureBox1.Image));
+            ip.cannyThreshold = Convert.ToInt32(textBox2.Text);
+            ip.cannyThresholdLinking = Convert.ToInt32(textBox3.Text);
+            progressBar1.Increment(1);
+
+            label1.Text = "Convert the image to grayscale and filter out the noise";
+            //Convert the image to grayscale and filter out the noise
+            Thread c2g = new Thread(ip.Convert2Grayscale);
+            c2g.Start();
+            c2g.Join();
+            pictureBox2.Image = ip.uimage.Bitmap;
+            progressBar1.Increment(1);
+
+            /*
+            label1.Text = "use image pyr to remove noise";
+            //use image pyr to remove noise
+            Thread rmnoise = new Thread(ip.RemoveNoiseByPyr);
+            rmnoise.Start();
+            rmnoise.Join();
+            progressBar1.Increment(1);
+            */
+
+            label1.Text = "Canny and edge detection";
+            Thread canny = new Thread(ip.CannyEdgeDetection);
+            canny.Start();
+            canny.Join();
+            progressBar1.Increment(1);
+            //pictureBox2.Image = ip.cannyEdges.Bitmap;
+            
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            label1.Text = "Convert the image to grayscale and filter out the noise";
+            //Convert the image to grayscale and filter out the noise
+            Thread c2g = new Thread(DrawGrayScale);
+            c2g.Start();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            label1.Text = "use image pyr to remove noise";
+            //Convert the image to grayscale and filter out the noise
+            Thread pyr = new Thread(DrawPyr);
+            pyr.Start();
+        }
+
+        private void DrawGrayScale()
+        {
+            GrayScale gs = new GrayScale(Convert2Gray);
+            Image img = pictureBox1.Image;
+            this.BeginInvoke(gs, new Object[] { new Image<Rgb, Byte>(new Bitmap(img, Convert.ToInt32(img.Width /4),Convert.ToInt32(img.Height / 4))) });
+        }
+
+        private void Convert2Gray(Image<Rgb, Byte> input)
+        {
+            uimage = new UMat();
+            CvInvoke.CvtColor(input, uimage, ColorConversion.Rgb2Gray);
+            pictureBox2.Image = uimage.Bitmap;
+        }
+
+        private void DrawPyr()
+        {
+            UpdateImage pyr = new UpdateImage(RemoveNoiseByPyr);
+            this.BeginInvoke(pyr, new Object[] { });
+        }
+
+        private void RemoveNoiseByPyr()
+        {
             UMat pyrDown = new UMat();
             CvInvoke.PyrDown(uimage, pyrDown);
             CvInvoke.PyrUp(pyrDown, uimage);
+            pictureBox2.Image = uimage.Bitmap;
+        }
 
+        private void DrawCanny()
+        {
+            UpdateImage canny = new UpdateImage(CannyEdgeDetection);
+            this.BeginInvoke(canny, new Object[] { });
+        }
+
+        public void CannyEdgeDetection()
+        {
             #region Canny and edge detection
-            double cannyThreshold = 180.0;
-            double cannyThresholdLinking = 120.0;
-            UMat cannyEdges = new UMat();
-            CvInvoke.Canny(uimage, cannyEdges, cannyThreshold, cannyThresholdLinking);
-
+            cannyEdges = new UMat();
+            CvInvoke.Canny(uimage, cannyEdges, Convert.ToDouble(textBox2.Text), Convert.ToDouble(textBox3.Text));
+            
             LineSegment2D[] lines = CvInvoke.HoughLinesP(
                cannyEdges,
                1, //Distance resolution in pixel-related units
-               Math.PI / 45.0, //Angle resolution measured in radians.
+               Math.PI / 180.0, //Angle resolution measured in radians.
                20, //threshold
-               30, //min Line width
-               2000); //gap between lines
-
+               180, //min Line width
+               10); //gap between lines
+            
             #endregion
+            pictureBox2.Image = cannyEdges.Bitmap;
+            //draw lines on image
+            Image<Rgb, Byte> img = new Image<Rgb, byte>((Bitmap)pictureBox2.Image);
+            foreach (var line in lines)
+            {
+                img.Draw(line, new Rgb(Color.DarkOrange), 1);
+            }
+            pictureBox2.Image = img.Bitmap;
+            cannyEdges.Bitmap.Save("flo_"+count+".png");
+            count++;
 
-            #region Find triangles and rectangles
-            List<RotatedRect> boxList = new List<RotatedRect>(); //a box is a rotated rectangle
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            label1.Text = "Canny and edge detection";
+            Thread canny = new Thread(DrawCanny);
+            canny.Start();
+        }
+
+        private void DrawRect()
+        {
+            UpdateImage rect = new UpdateImage(FindRectangle);
+            this.BeginInvoke(rect, new Object[] { });
+        }
+
+        public void FindRectangle()
+        {
+            #region Find rectangles
+            boxList = new List<RotatedRect>(); //a box is a rotated rectangle
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
             {
                 CvInvoke.FindContours(cannyEdges, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
@@ -75,7 +241,7 @@ namespace Finder
                     using (VectorOfPoint approxContour = new VectorOfPoint())
                     {
                         CvInvoke.ApproxPolyDP(contour, approxContour, CvInvoke.ArcLength(contour, true) * 0.05, true);
-                        if (CvInvoke.ContourArea(approxContour, false) > 2000) //only consider contours with area greater than 250
+                        if (CvInvoke.ContourArea(approxContour, false) > 250) //only consider contours with area greater than 250
                         {
                             if (approxContour.Size == 4) //The contour has 4 vertices.
                             {
@@ -103,19 +269,19 @@ namespace Finder
                 }
             }
             #endregion
-
-            #region draw triangles and rectangles
-
+            #region draw rectangles
+            Image<Rgb, Byte> img = new Image<Rgb,byte>((Bitmap)pictureBox1.Image);
             foreach (RotatedRect box in boxList)
                 img.Draw(box, new Rgb(Color.DarkOrange), 2);
-            pictureBox1.Image = img.Bitmap;
+            pictureBox2.Image = img.Bitmap;
             #endregion
         }
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        private void button7_Click(object sender, EventArgs e)
         {
-            //pictureBox1.Height = this.Height;
-            //pictureBox1.Width = this.Width;
+            label1.Text = "Draw rectangles";
+            Thread rect = new Thread(DrawRect);
+            rect.Start();
         }
     }
 }
