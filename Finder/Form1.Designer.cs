@@ -44,6 +44,9 @@
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.button8 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -51,7 +54,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(735, 15);
+            this.button1.Location = new System.Drawing.Point(735, 10);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 3;
@@ -68,11 +71,11 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(447, 134);
+            this.button2.Location = new System.Drawing.Point(450, 134);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(128, 23);
             this.button2.TabIndex = 6;
-            this.button2.Text = "RegtangleDetect";
+            this.button2.Text = "EdgeFilter";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -131,7 +134,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(148, 23);
             this.button3.TabIndex = 11;
-            this.button3.Text = "CannyEdgeDetection";
+            this.button3.Text = "FindTarget";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -141,6 +144,7 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(100, 22);
             this.textBox2.TabIndex = 12;
+            this.textBox2.Text = "20";
             // 
             // textBox3
             // 
@@ -148,10 +152,11 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(100, 22);
             this.textBox3.TabIndex = 13;
+            this.textBox3.Text = "20";
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(580, 133);
+            this.button4.Location = new System.Drawing.Point(450, 188);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(115, 23);
             this.button4.TabIndex = 14;
@@ -161,7 +166,7 @@
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(701, 132);
+            this.button5.Location = new System.Drawing.Point(662, 217);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(109, 23);
             this.button5.TabIndex = 15;
@@ -171,7 +176,7 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(450, 164);
+            this.button6.Location = new System.Drawing.Point(450, 245);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(100, 23);
             this.button6.TabIndex = 16;
@@ -181,7 +186,7 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(556, 164);
+            this.button7.Location = new System.Drawing.Point(556, 245);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(139, 23);
             this.button7.TabIndex = 17;
@@ -189,11 +194,40 @@
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(450, 217);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(100, 22);
+            this.textBox4.TabIndex = 18;
+            this.textBox4.Text = "17";
+            // 
+            // textBox5
+            // 
+            this.textBox5.Location = new System.Drawing.Point(556, 217);
+            this.textBox5.Name = "textBox5";
+            this.textBox5.Size = new System.Drawing.Size(100, 22);
+            this.textBox5.TabIndex = 19;
+            this.textBox5.Text = "3";
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(585, 134);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(98, 23);
+            this.button8.TabIndex = 20;
+            this.button8.Text = "SobelFilter";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(940, 741);
+            this.ClientSize = new System.Drawing.Size(823, 704);
+            this.Controls.Add(this.button8);
+            this.Controls.Add(this.textBox5);
+            this.Controls.Add(this.textBox4);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
@@ -234,6 +268,9 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.Button button8;
     }
 }
 

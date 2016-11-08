@@ -19,9 +19,11 @@ namespace Finder
     {
         public delegate void GrayScale(Image<Rgb, Byte> input);
         public delegate void UpdateImage();
-        UMat uimage, cannyEdges;
+        UMat uimage, cannyEdges, houghLines;
         public List<RotatedRect> boxList;
+        LineSegment2D[] lines;
         int count = 0;
+        int fstIndex;
 
         public Form1()
         {
@@ -42,50 +44,9 @@ namespace Finder
 
         private void button2_Click(object sender, EventArgs e)
         {
-            progressBar1.Maximum = 6;
-            progressBar1.Value = 0;
-            
-            label1.Text = "Loading image...";
-            ImageProcesser ip = new ImageProcesser((Bitmap)(pictureBox1.Image));
-            progressBar1.Increment(1);
-
-            label1.Text = "Convert the image to grayscale and filter out the noise";
-            //Convert the image to grayscale and filter out the noise
-            Thread c2g = new Thread(ip.Convert2Grayscale);
-            c2g.Start();
-            c2g.Join();
-            progressBar1.Increment(1);
-
-            label1.Text = "use image pyr to remove noise";
-            //use image pyr to remove noise
-            Thread rmnoise = new Thread(ip.RemoveNoiseByPyr);
-            rmnoise.Start();
-            rmnoise.Join();
-            progressBar1.Increment(1);
-
-            label1.Text = "Canny and edge detection";
-            Thread canny = new Thread(ip.CannyEdgeDetection);
-            canny.Start();
-            canny.Join();
-            progressBar1.Increment(1);
-            pictureBox2.Image = ip.cannyEdges.Bitmap;
-
-            label1.Text = "Find rectangles";
-            Thread findRect = new Thread(ip.FindRectangle);
-            findRect.Start();
-            findRect.Join();
-            progressBar1.Increment(1);
-
             label1.Text = "Draw rectangles";
-            #region draw rectangles
-            List<RotatedRect> boxList = ip.boxList;
-            Image<Rgb, Byte> img = ip.img;
-            foreach (RotatedRect box in boxList)
-                img.Draw(box, new Rgb(Color.DarkOrange), 2);
-            pictureBox1.Image = img.Bitmap;
-            #endregion
-            progressBar1.Increment(1);
-            label1.Text = "Finished!";
+            Thread edge = new Thread(DrawEdge);
+            edge.Start();
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -104,36 +65,22 @@ namespace Finder
             progressBar1.Maximum = 3;
             progressBar1.Value = 0;
 
-            label1.Text = "Loading image...";
-            ImageProcesser ip = new ImageProcesser((Bitmap)(pictureBox1.Image));
-            ip.cannyThreshold = Convert.ToInt32(textBox2.Text);
-            ip.cannyThresholdLinking = Convert.ToInt32(textBox3.Text);
+            label1.Text = "Draw edges";
+            Thread edge = new Thread(DrawEdge);
+            edge.Start();
             progressBar1.Increment(1);
 
-            label1.Text = "Convert the image to grayscale and filter out the noise";
-            //Convert the image to grayscale and filter out the noise
-            Thread c2g = new Thread(ip.Convert2Grayscale);
-            c2g.Start();
-            c2g.Join();
-            pictureBox2.Image = ip.uimage.Bitmap;
+            label1.Text = "Draw sobel";
+            Thread sobel = new Thread(DrawSobel);
+            sobel.Start();
             progressBar1.Increment(1);
 
-            /*
-            label1.Text = "use image pyr to remove noise";
-            //use image pyr to remove noise
-            Thread rmnoise = new Thread(ip.RemoveNoiseByPyr);
-            rmnoise.Start();
-            rmnoise.Join();
+            label1.Text = "Draw rectangles";
+            Thread rect = new Thread(DrawRect);
+            rect.Start();
             progressBar1.Increment(1);
-            */
 
-            label1.Text = "Canny and edge detection";
-            Thread canny = new Thread(ip.CannyEdgeDetection);
-            canny.Start();
-            canny.Join();
-            progressBar1.Increment(1);
-            //pictureBox2.Image = ip.cannyEdges.Bitmap;
-            
+            label1.Text = "Finished";
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -156,7 +103,7 @@ namespace Finder
         {
             GrayScale gs = new GrayScale(Convert2Gray);
             Image img = pictureBox1.Image;
-            this.BeginInvoke(gs, new Object[] { new Image<Rgb, Byte>(new Bitmap(img, Convert.ToInt32(img.Width /4),Convert.ToInt32(img.Height / 4))) });
+            this.BeginInvoke(gs, new Object[] { new Image<Rgb, Byte>(new Bitmap(img, Convert.ToInt32(img.Width / 4), Convert.ToInt32(img.Height / 4))) });
         }
 
         private void Convert2Gray(Image<Rgb, Byte> input)
@@ -174,9 +121,14 @@ namespace Finder
 
         private void RemoveNoiseByPyr()
         {
+            int x = Convert.ToInt32(textBox4.Text);
+            int y = Convert.ToInt32(textBox5.Text);
             UMat pyrDown = new UMat();
             CvInvoke.PyrDown(uimage, pyrDown);
             CvInvoke.PyrUp(pyrDown, uimage);
+            CvInvoke.AdaptiveThreshold(uimage, uimage, 255, AdaptiveThresholdType.MeanC, ThresholdType.Binary, 25, 5);
+            Mat structure = CvInvoke.GetStructuringElement(ElementShape.Cross, new Size(x, y), new Point(-1, 1));
+            CvInvoke.MorphologyEx(uimage, uimage, MorphOp.Close, structure, new Point(-1, 1), 1, BorderType.Default, new MCvScalar());
             pictureBox2.Image = uimage.Bitmap;
         }
 
@@ -191,25 +143,57 @@ namespace Finder
             #region Canny and edge detection
             cannyEdges = new UMat();
             CvInvoke.Canny(uimage, cannyEdges, Convert.ToDouble(textBox2.Text), Convert.ToDouble(textBox3.Text));
-            
-            LineSegment2D[] lines = CvInvoke.HoughLinesP(
+
+            houghLines = new UMat();
+            CvInvoke.HoughLines(
+               uimage,
+               houghLines,
+               3, //Distance resolution in pixel-related units
+               Math.PI / 90.0, //Angle resolution measured in radians.
+               5, //threshold
+               1, //min Line width
+               5); //gap between lines
+            lines = CvInvoke.HoughLinesP(
                cannyEdges,
-               1, //Distance resolution in pixel-related units
-               Math.PI / 180.0, //Angle resolution measured in radians.
-               20, //threshold
-               180, //min Line width
-               10); //gap between lines
-            
+               3, //Distance resolution in pixel-related units
+               Math.PI / 90.0, //Angle resolution measured in radians.
+               5, //threshold
+               1, //min Line width
+               5); //gap between lines
+
             #endregion
             pictureBox2.Image = cannyEdges.Bitmap;
             //draw lines on image
-            Image<Rgb, Byte> img = new Image<Rgb, byte>((Bitmap)pictureBox2.Image);
-            foreach (var line in lines)
+            Image<Rgb, Byte> img = new Image<Rgb, byte>((Bitmap)pictureBox1.Image);
+            fstIndex = 0;
+            double highest = img.Height;
+            for (int i = 0; i < lines.Length; i++)
             {
-                img.Draw(line, new Rgb(Color.DarkOrange), 1);
+                LineSegment2D line = lines[i];
+                Point a = line.P1;
+                Point b = line.P2;
+
+                // recog hline
+                double sin = Math.Abs(a.X - b.X) / line.Length;
+                if (sin < 0.5)
+                {
+                    double avgh = (a.Y + b.Y) / 2;
+                    if (avgh < highest)
+                    {
+                        highest = avgh;
+                        fstIndex = i;
+                    }
+                }
+
+
+                LineSegment2D nline = new LineSegment2D();
+                nline.P1 = new Point(a.X * 4, a.Y * 4);
+                nline.P2 = new Point(b.X * 4, b.Y * 4);
+                //img.Draw(nline, new Rgb(Color.DarkOrange), 2);
             }
-            pictureBox2.Image = img.Bitmap;
-            cannyEdges.Bitmap.Save("flo_"+count+".png");
+            pictureBox1.Image = img.Bitmap;
+            cannyEdges.Bitmap.Save("flo_" + count + ".png");
+            img.Bitmap.Save("lines_" + count + ".png");
             count++;
 
         }
@@ -229,8 +213,12 @@ namespace Finder
 
         public void FindRectangle()
         {
+            Image<Rgb, Byte> img = new Image<Rgb, byte>((Bitmap)pictureBox1.Image);
             #region Find rectangles
+            double min = Convert.ToDouble(textBox2.Text);
+            double max = Convert.ToDouble(textBox3.Text);
             boxList = new List<RotatedRect>(); //a box is a rotated rectangle
+            double rate = img.Width * img.Height / 3864714.0;
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
             {
                 CvInvoke.FindContours(cannyEdges, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
@@ -241,39 +229,71 @@ namespace Finder
                     using (VectorOfPoint approxContour = new VectorOfPoint())
                     {
                         CvInvoke.ApproxPolyDP(contour, approxContour, CvInvoke.ArcLength(contour, true) * 0.05, true);
-                        if (CvInvoke.ContourArea(approxContour, false) > 250) //only consider contours with area greater than 250
+                        double area = CvInvoke.ContourArea(contour, false);
+                        if (area > 100000 * rate && area < 142000 * rate)
                         {
-                            if (approxContour.Size == 4) //The contour has 4 vertices.
+                            // eid, date, price
+                            Point[] pts = contour.ToArray();
+                            PointF[] ptfs = new PointF[pts.Length];
+                            for (int pi = 0; pi < pts.Length; pi++)
+                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+                            img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkOrange), 2);
+                        }
+                        else if (area > 350000 * rate && area < 450000 * rate)
+                        {
+                            // use
+                            Point[] pts = contour.ToArray();
+                            PointF[] ptfs = new PointF[pts.Length];
+                            int minx=int.MaxValue, miny=int.MaxValue, maxx=0, maxy=0;
+                            for (int pi = 0; pi < pts.Length; pi++)
                             {
-                                #region determine if all the angles in the contour are within [80, 100] degree
-                                bool isRectangle = true;
-                                Point[] pts = approxContour.ToArray();
-                                LineSegment2D[] edges = PointCollection.PolyLine(pts, true);
-
-                                for (int j = 0; j < edges.Length; j++)
+                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+                                if (pts[pi].X < minx)
                                 {
-                                    double angle = Math.Abs(
-                                       edges[(j + 1) % edges.Length].GetExteriorAngleDegree(edges[j]));
-                                    if (angle < 80 || angle > 100)
-                                    {
-                                        isRectangle = false;
-                                        break;
-                                    }
+                                    minx = pts[pi].X;
                                 }
-                                #endregion
-
-                                if (isRectangle) boxList.Add(CvInvoke.MinAreaRect(approxContour));
+                                if (pts[pi].Y < miny)
+                                {
+                                    miny = pts[pi].Y;
+                                }
+                                if (pts[pi].X > maxx)
+                                {
+                                    maxx = pts[pi].X;
+                                }
+                                if (pts[pi].Y > maxy)
+                                {
+                                    maxy = pts[pi].Y;
+                                }
                             }
+
+                            img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkOrange), 2);
+
+                            PointF[] ptfks = new PointF[4];
+                            ptfks[0] = new PointF(maxx * 1.5f, maxy);
+                            ptfks[1] = new PointF(maxx * 1.5f, (float)(maxy + 32 * rate));
+                            ptfks[2] = new PointF(minx, maxy);
+                            ptfks[3] = new PointF(minx, (float)(maxy + 32 * rate));
+                            img.Draw(PointCollection.BoundingRectangle(ptfks), new Rgb(Color.DarkOrange), 2);
+                        }
+                        else if (area > min * rate && area < max * rate)
+                        {
+                            // use
+                            Point[] pts = contour.ToArray();
+                            PointF[] ptfs = new PointF[pts.Length];
+                            for (int pi = 0; pi < pts.Length; pi++)
+                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+                            img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkRed), 2);
                         }
                     }
                 }
             }
             #endregion
             #region draw rectangles
-            Image<Rgb, Byte> img = new Image<Rgb,byte>((Bitmap)pictureBox1.Image);
-            foreach (RotatedRect box in boxList)
-                img.Draw(box, new Rgb(Color.DarkOrange), 2);
+
+            //foreach (RotatedRect box in boxList)
+            //img.Draw(box, new Rgb(Color.DarkOrange), 2);
             pictureBox2.Image = img.Bitmap;
+            img.Save("rect_" + this.count + ".png");
             #endregion
         }
 
@@ -283,5 +303,93 @@ namespace Finder
             Thread rect = new Thread(DrawRect);
             rect.Start();
         }
+
+        private void DrawEdge()
+        {
+            UpdateImage edge = new UpdateImage(EdgeFilter);
+            this.BeginInvoke(edge, new Object[] { });
+        }
+
+        private void EdgeFilter()
+        {
+            Image<Rgb, Byte> img = new Image<Rgb, byte>((Bitmap)pictureBox1.Image);
+            MIplImage MIpImg = (MIplImage)System.Runtime.InteropServices.Marshal.PtrToStructure(img.Ptr, typeof(MIplImage));
+            unsafe
+            {
+                int height = img.Height;
+                int width = img.Width;
+                int point;
+                byte* npixel = (byte*)MIpImg.ImageData;
+
+                for (int h = 0; h < height; h++)
+                {
+                    for (int w = 0; w < width; w++)
+                    {
+                        point = w * 3;
+                        double avg = (npixel[point] + npixel[point + 1] + npixel[point + 2]) / 3;
+                        if (npixel[point] > avg - 15 && npixel[point] < avg + 15
+                            && npixel[point + 1] > avg - 15 && npixel[point + 1] < avg + 15
+                            && npixel[point + 2] > avg - 15 && npixel[point + 2] < avg + 15)
+                        {
+                            if (avg < 200)
+                            {
+                                npixel[point] = 0;
+                                npixel[point + 1] = 0;
+                                npixel[point + 2] = 0;
+                            }
+                            else
+                            {
+                                npixel[point] = 255;
+                                npixel[point + 1] = 255;
+                                npixel[point + 2] = 255;
+                            }
+                        }
+                    }
+                    npixel = npixel + MIpImg.WidthStep;
+                }
+
+            }
+            img.Save("edge_" + count + ".png");
+            pictureBox1.Image = img.Bitmap;
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            label1.Text = "Draw sobel";
+            Thread sobel = new Thread(DrawSobel);
+            sobel.Start();
+        }
+
+        private void DrawSobel()
+        {
+            UpdateImage sobel = new UpdateImage(SobelFilter);
+            this.BeginInvoke(sobel, new Object[] { });
+        }
+
+        private void SobelFilter()
+        {
+            Image<Gray, Byte> img = new Image<Gray, byte>((Bitmap)pictureBox1.Image);
+            Image<Gray, float> shimg = img.Sobel(1, 0, 3);
+            Image<Gray, float> svimg = img.Sobel(0, 1, 3);
+
+            //Convert negative values to positive valus
+            shimg = shimg.AbsDiff(new Gray(0));
+            svimg = svimg.AbsDiff(new Gray(0));
+
+            Image<Gray, float> sobel = shimg + svimg;
+            //Find sobel min or max value
+            double[] mins, maxs;
+            //Find sobel min or max value position
+            Point[] minLoc, maxLoc;
+            sobel.MinMax(out mins, out maxs, out minLoc, out maxLoc);
+            //Conversion to 8-bit image
+            Image<Gray, Byte> sobelImage = sobel.ConvertScale<byte>(255 / maxs[0], 0);
+
+            cannyEdges = new UMat();
+            CvInvoke.Threshold(sobelImage, cannyEdges, 70, 255, ThresholdType.Binary);
+            cannyEdges.Save("sobel_" + count + ".png");
+            //pictureBox1.Image = sobelImage.Bitmap;
+        }
+
     }
 }
