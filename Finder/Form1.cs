@@ -12,6 +12,8 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using System.Drawing;
 using System.Threading;
+using Tesseract;
+using System.Text.RegularExpressions;
 
 namespace Finder
 {
@@ -24,6 +26,7 @@ namespace Finder
         LineSegment2D[] lines;
         int count = 0;
         int fstIndex;
+        private List<Rectangle> rects = new List<Rectangle>();
 
         public Form1()
         {
@@ -219,6 +222,7 @@ namespace Finder
             double max = Convert.ToDouble(textBox3.Text);
             boxList = new List<RotatedRect>(); //a box is a rotated rectangle
             double rate = img.Width * img.Height / 3864714.0;
+            bool isIDPExist = false, isUseExist = false, isAddressExist = false;
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
             {
                 CvInvoke.FindContours(cannyEdges, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
@@ -230,24 +234,26 @@ namespace Finder
                     {
                         CvInvoke.ApproxPolyDP(contour, approxContour, CvInvoke.ArcLength(contour, true) * 0.05, true);
                         double area = CvInvoke.ContourArea(contour, false);
-                        if (area > 100000 * rate && area < 142000 * rate)
+                        if (area > 100000 * rate && area < 142000 * rate && !isIDPExist)
                         {
                             // eid, date, price
                             Point[] pts = contour.ToArray();
                             PointF[] ptfs = new PointF[pts.Length];
                             for (int pi = 0; pi < pts.Length; pi++)
                                 ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
-                            img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkOrange), 2);
+                            Rectangle rec = PointCollection.BoundingRectangle(ptfs);
+                            img.Draw(rec, new Rgb(Color.DarkOrange), 2);
+                            rects.Add(rec);
+                            isIDPExist = true;
                         }
                         else if (area > 350000 * rate && area < 450000 * rate)
                         {
                             // use
                             Point[] pts = contour.ToArray();
-                            PointF[] ptfs = new PointF[pts.Length];
-                            int minx=int.MaxValue, miny=int.MaxValue, maxx=0, maxy=0;
+                            PointF[] ptfs = new PointF[4];
+                            int minx = int.MaxValue, miny = int.MaxValue, maxx = 0, maxy = 0;
                             for (int pi = 0; pi < pts.Length; pi++)
                             {
-                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
                                 if (pts[pi].X < minx)
                                 {
                                     minx = pts[pi].X;
@@ -265,15 +271,31 @@ namespace Finder
                                     maxy = pts[pi].Y;
                                 }
                             }
-
+                            ptfs[0] = new PointF(minx, miny);
+                            ptfs[1] = new PointF(minx, (miny + maxy) / 2);
+                            ptfs[2] = new PointF(maxx, miny);
+                            ptfs[3] = new PointF(maxx, (miny + maxy) / 2);
+                            Rectangle rec = PointCollection.BoundingRectangle(ptfs);
                             img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkOrange), 2);
+                            if (!isUseExist)
+                            {
+                                rects.Add(rec);
+                                isUseExist = true;
+                            }
+                            
 
                             PointF[] ptfks = new PointF[4];
                             ptfks[0] = new PointF(maxx * 1.5f, maxy);
                             ptfks[1] = new PointF(maxx * 1.5f, (float)(maxy + 32 * rate));
                             ptfks[2] = new PointF(minx, maxy);
                             ptfks[3] = new PointF(minx, (float)(maxy + 32 * rate));
+                            Rectangle rec2 = PointCollection.BoundingRectangle(ptfks);
                             img.Draw(PointCollection.BoundingRectangle(ptfks), new Rgb(Color.DarkOrange), 2);
+                            if (!isAddressExist)
+                            {
+                                rects.Add(rec2);
+                                isAddressExist = true;
+                            }
                         }
                         else if (area > min * rate && area < max * rate)
                         {
@@ -282,7 +304,9 @@ namespace Finder
                             PointF[] ptfs = new PointF[pts.Length];
                             for (int pi = 0; pi < pts.Length; pi++)
                                 ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+                            Rectangle rec = PointCollection.BoundingRectangle(ptfs);
                             img.Draw(PointCollection.BoundingRectangle(ptfs), new Rgb(Color.DarkRed), 2);
+                            //rects.Add(rec);
                         }
                     }
                 }
@@ -389,6 +413,87 @@ namespace Finder
             CvInvoke.Threshold(sobelImage, cannyEdges, 70, 255, ThresholdType.Binary);
             cannyEdges.Save("sobel_" + count + ".png");
             //pictureBox1.Image = sobelImage.Bitmap;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            #region 影像裁切(裁切中心400x300)
+
+            //設定裁切範圍
+            foreach (Rectangle rect in rects)
+            {
+                Image img = pictureBox1.Image;
+                //建立新的影像
+                Image cropImage = new Bitmap(rect.Width, rect.Height) as Image;
+                //準備繪製新的影像
+                Graphics graphics2 = Graphics.FromImage(cropImage);
+                //開始繪製裁切影像
+                graphics2.DrawImage(pictureBox1.Image, 0, 0, rect, GraphicsUnit.Pixel);
+                graphics2.Dispose();
+                //儲存新的影像
+                cropImage.Save("crop_" + count + ".png");
+                count++;
+            }
+
+            #endregion
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            TesseractEngine ocr = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "chi_tra+eng",EngineMode.Default);
+            Pix img = Pix.LoadFromFile("crop_1.png");
+            Page addpage = ocr.Process(img);
+            string[] address = addpage.GetText().Trim().Split(new char[] { '：', ':', '︰' });
+            label11.Text = address[1].Trim().Replace(" ",String.Empty);
+            ocr.Dispose();
+
+            Pix idpimg = Pix.LoadFromFile("crop_2.png");
+            TesseractEngine ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng",EngineMode.Default);
+            Page idppage = ocre.Process(idpimg);
+            string[] idpdata = idppage.GetText().Trim().Split(' ');
+            int tar = 0;
+            string eid = "";
+            for (int i = 0; i < idpdata.Length; i++)
+            {
+                Regex rex = new Regex("\\d{2}-\\d{2}-\\d{4}-\\d{2}-\\d{1}");
+                if (rex.IsMatch(idpdata[i]))
+                {
+                    tar = i;
+                    Match match = rex.Match(idpdata[i]);
+                    eid = match.Value;
+                    break;
+                }
+            }
+            ocre.Dispose();
+
+            string date = idpdata[tar + 1];
+            string price = idpdata[tar + 2].Replace("*",String.Empty);
+            label3.Text = eid;
+            label5.Text = date;
+            label7.Text = price;
+
+            Pix kwhimg = Pix.LoadFromFile("crop_0.png");
+            ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng", EngineMode.Default);
+            Page kwhpage = ocre.Process(kwhimg);
+            string[] kwhdata = kwhpage.GetText().Trim().Split(' ');
+            string kwh = "";
+            for (int i = 0; i < kwhdata.Length; i++)
+            {
+                Regex rex = new Regex("\\*\\d{1,}");
+                if (rex.IsMatch(kwhdata[i]))
+                {
+                    Match match = rex.Match(kwhdata[i]);
+                    kwh = match.Value.Replace("*",String.Empty);
+                    break;
+                }
+            }
+            label9.Text = kwh + "度";
+            ocre.Dispose();
         }
 
     }
