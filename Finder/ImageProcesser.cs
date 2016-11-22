@@ -8,17 +8,19 @@ using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using System.Drawing;
+using Tesseract;
+using System.Text.RegularExpressions;
 
 namespace Finder
 {
     class ImageProcesser
     {
-        UMat sobelEdges;
-        public List<RotatedRect> boxList;
-        public int count = 0;
-        public List<Rectangle> rects = new List<Rectangle>();
-        Bitmap ori_img, pro_img;
-        public Bitmap[] targets = new Bitmap[3];
+        static UMat sobelEdges;
+        public static List<RotatedRect> boxList;
+        public static int count = 0;
+        public static List<Rectangle> rects = new List<Rectangle>();
+        static Bitmap ori_img, pro_img;
+        public static Bitmap[] targets = new Bitmap[3];
 
         public ImageProcesser(Bitmap ori, Bitmap pro)
         {
@@ -26,7 +28,86 @@ namespace Finder
             pro_img = pro;
         }
 
-        public void FindRectangle()
+        public static void RecognizeBill(object obj)
+        {
+            object[] objs = (object[])obj;
+            RecognizeForm reg = (RecognizeForm)objs[0];
+            ori_img = (Bitmap)objs[1];
+            pro_img = (Bitmap)objs[2];
+            reg.UpdateText("Clear Edges");
+            EdgeFilter();
+
+            reg.UpdateLog("Clear Edges");
+            reg.UpdateText("Execute Sobel Filter");
+            SobelFilter();
+
+            reg.UpdateLog("Execute Sobel Filter");
+            reg.UpdateText("Find target Rectangles");
+            FindRectangle();
+
+            reg.UpdateLog("Find target Rectangles");
+            reg.UpdateText("Cut image");
+            CutImage();
+
+            reg.UpdateLog("Cut image");
+            reg.UpdateText("Recognize address");
+            TesseractEngine ocr = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "chi_tra+eng", EngineMode.Default);
+            Pix img = PixConverter.ToPix(targets[1]);
+            Page addpage = ocr.Process(img);
+            string[] address = addpage.GetText().Trim().Split(new char[] { '：', ':', '︰' });
+            string addr = address[1].Trim().Replace(" ", String.Empty);
+            ocr.Dispose();
+
+            reg.UpdateLog("Recognize address");
+            reg.UpdateText("Recognize eid, date, price");
+            Pix idpimg = PixConverter.ToPix(targets[2]);
+            TesseractEngine ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng", EngineMode.Default);
+            Page idppage = ocre.Process(idpimg);
+            string[] idpdata = idppage.GetText().Trim().Split(' ');
+            int tar = 0;
+            string eid = "";
+            for (int i = 0; i < idpdata.Length; i++)
+            {
+                Regex rex = new Regex("\\d{2}-\\d{2}-\\d{4}-\\d{2}-\\d{1}");
+                if (rex.IsMatch(idpdata[i]))
+                {
+                    tar = i;
+                    Match match = rex.Match(idpdata[i]);
+                    eid = match.Value;
+                    break;
+                }
+            }
+            ocre.Dispose();
+
+            string date = idpdata[tar + 1];
+            string price = idpdata[tar + 2].Replace("*", String.Empty);
+
+            reg.UpdateLog("Recognize eid, date, price\n");
+            reg.UpdateText("Recognize kWh");
+            Pix kwhimg = PixConverter.ToPix(targets[0]);
+            ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng", EngineMode.Default);
+            Page kwhpage = ocre.Process(kwhimg);
+            string[] kwhdata = kwhpage.GetText().Trim().Split(' ');
+            string kwh = "";
+            for (int i = 0; i < kwhdata.Length; i++)
+            {
+                Regex rex = new Regex("\\*\\d{1,}");
+                if (rex.IsMatch(kwhdata[i]))
+                {
+                    Match match = rex.Match(kwhdata[i]);
+                    kwh = match.Value.Replace("*", String.Empty);
+                    break;
+                }
+            }
+            ocre.Dispose();
+
+            reg.UpdateLog("Recognize kWh");
+            reg.UpdateLog("Result [ "+eid+" , "+date+" , "+price+" , "+kwh+" , "+addr+" ]");
+            reg.UpdateText("Finished");
+            reg.UpdateLog("Finished");
+        }
+
+        private static void FindRectangle()
         {
             Image<Rgb, Byte> img = new Image<Rgb, byte>(ori_img);
             #region Find rectangles
@@ -120,7 +201,7 @@ namespace Finder
             #endregion
         }
 
-        public void EdgeFilter()
+        private static void EdgeFilter()
         {
             Image<Rgb, Byte> img = new Image<Rgb, byte>(ori_img);
             MIplImage MIpImg = (MIplImage)System.Runtime.InteropServices.Marshal.PtrToStructure(img.Ptr, typeof(MIplImage));
@@ -163,7 +244,7 @@ namespace Finder
             ori_img = img.Bitmap;
         }
 
-        public void SobelFilter()
+        private static void SobelFilter()
         {
             Image<Gray, Byte> img = new Image<Gray, byte>(ori_img);
             Image<Gray, float> shimg = img.Sobel(1, 0, 3);
@@ -188,7 +269,7 @@ namespace Finder
             //pictureBox1.Image = sobelImage.Bitmap;
         }
 
-        public void CutImage()
+        private static void CutImage()
         {
             #region 影像裁切
             Image img = ori_img as Image;
