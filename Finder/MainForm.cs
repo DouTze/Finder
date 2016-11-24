@@ -18,6 +18,13 @@ namespace Finder
         delegate void UpdateMainText(String text);
         delegate void UpdateMainLabel(Label label, String content);
         string[] loading = new string[] { "一", "\\", "|", "/" };
+        string showpwd = "Taipei City Public Transportation Office............................................................Design By DouTze, 2016. ";
+        int showpwd_i = 0;
+        string spd = "";
+        bool login_a = false;
+        bool login_p = false;
+        string user = "";
+        string password = "";
 
         public RecognizeForm()
         {
@@ -37,7 +44,7 @@ namespace Finder
 
             Thread recogBill = new Thread(new ParameterizedThreadStart(ImageProcesser.RecognizeBill));
             recogBill.IsBackground = true;
-            recogBill.Start(new object[] {this,  pictureBox1.Image, pictureBox2.Image});
+            recogBill.Start(new object[] { this, pictureBox1.Image, pictureBox2.Image });
 
             Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
             loadingAnime.IsBackground = true;
@@ -63,7 +70,16 @@ namespace Finder
                 loadingAnime.Start(a2b);
             }
         }
-        
+
+        private void Login()
+        {
+            textBox1.Text = "";
+
+            UpdateText("Enter User Account");
+            login_a = true;
+            ReleaseCommand();
+        }
+
         public void UpdateText(String text)
         {
             if (this.InvokeRequired)
@@ -148,10 +164,55 @@ namespace Finder
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
+            if (login_p
+                && !((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Enter))
+            {
+                if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Back)
+                {
+                    showpwd_i = (showpwd_i - 1) % showpwd.Length;
+                    spd = spd.Remove(spd.Length);
+                    password = password.Remove(password.Length);
+                }
+                else
+                {
+                    password += e.KeyChar;
+                    e.KeyChar = showpwd[showpwd_i];
+                    textBox1.Text = spd;
+                    spd += showpwd[showpwd_i++];
+                    showpwd_i = showpwd_i % showpwd.Length;
+                    textBox1.SelectionStart = textBox1.Text.Length;
+                }
+            }
             if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Enter)
             {
-                textBox1.ReadOnly = true;
-                ExecuteCommand(textBox1.Text);
+                if (login_a)
+                {
+                    user = textBox1.Text;
+                    UpdateLog("User:\t"+user);
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = true;
+                    UpdateText("Enter Password");
+                    
+                    login_a = false;
+                    login_p = true;
+                    ReleaseCommand();
+                }
+                else if (login_p)
+                {
+                    UpdateLog("[----PASSWORD----]");
+                    textBox1.Text = "";
+                    textBox1.ReadOnly = true;
+                    login_p = false;
+                    UpdateLog(password);
+                    password = "";
+                    showpwd_i = 0;
+                    ReleaseCommand();
+                }
+                else
+                {
+                    textBox1.ReadOnly = true;
+                    ExecuteCommand(textBox1.Text);
+                }
             }
         }
 
@@ -168,6 +229,10 @@ namespace Finder
                     UpdateLog(command);
                     A2B(comopt);
                     break;
+                case "login":
+                    UpdateLog(command);
+                    Login();
+                    break;
                 case "":
                     UpdateLog("");
                     ReleaseCommand();
@@ -182,7 +247,7 @@ namespace Finder
                     break;
                 default:
                     textBox1.Text = "";
-                    UpdateLog("Command \""+command+"\" not found");
+                    UpdateLog("Command \"" + command + "\" not found");
                     ReleaseCommand();
                     break;
             }
