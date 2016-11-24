@@ -202,6 +202,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>Database1.mdf</DependentUpon>
     </Content>
+    <Content Include="Emgu.CV.UI.dll" />
+    <Content Include="Emgu.CV.UI.GL.dll" />
+    <Content Include="Emgu.CV.World.dll" />
     <Content Include="x64\liblept172.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
