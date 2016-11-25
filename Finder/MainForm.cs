@@ -17,14 +17,15 @@ namespace Finder
         delegate void UpdateMain();
         delegate void UpdateMainText(String text);
         delegate void UpdateMainLabel(Label label, String content);
-        string[] loading = new string[] { "一", "\\", "|", "/" };
-        string showpwd = "Taipei City Public Transportation Office............................................................Design By DouTze, 2016. ";
-        int showpwd_i = 0;
-        string spd = "";
-        bool login_a = false;
-        bool login_p = false;
-        string user = "";
-        string password = "";
+        private string[] loading = new string[] { "一", "\\", "|", "/" };
+        private const string showpwd = "Taipei City Public Transportation Office............................................................Design By DouTze, 2016. ";
+        private int showpwd_i = 0;
+        private string spd = "";
+        private bool login_a = false;
+        private bool login_p = false;
+        private string userAccount = "";
+        private string password = "";
+        private User user;
 
         public RecognizeForm()
         {
@@ -71,13 +72,39 @@ namespace Finder
             }
         }
 
-        private void Login()
+        private void Login(string[] args)
         {
-            textBox1.Text = "";
+            if (args.Length == 1)
+            {
+                textBox1.Text = "";
 
-            UpdateText("Enter User Account");
-            login_a = true;
-            ReleaseCommand();
+                UpdateText("Enter User Account");
+                login_a = true;
+                ReleaseCommand();
+            }
+            string option = args[1];
+            try
+            {
+                switch (option)
+                {
+                    case "-r":
+                        Login login = new Login(this);
+                        UpdateLog(login.CreateUser(args[2], args[3], args[4], args[5], args[6]) ? "Create successful" : "Create failed");
+                        textBox1.Text = "";
+                        ReleaseCommand();
+                        break;
+                    default:
+                        UpdateLog("Option [ " + option + " ] not found");
+                        ReleaseCommand();
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateLog(e.Message);
+                ReleaseCommand();
+            }
+            
         }
 
         public void UpdateText(String text)
@@ -167,11 +194,11 @@ namespace Finder
             if (login_p
                 && !((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Enter))
             {
-                if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Back)
+                if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Back && spd.Length > 0)
                 {
                     showpwd_i = (showpwd_i - 1) % showpwd.Length;
-                    spd = spd.Remove(spd.Length);
-                    password = password.Remove(password.Length);
+                    spd = spd.Remove(spd.Length - 1);
+                    password = password.Remove(password.Length - 1);
                 }
                 else
                 {
@@ -187,12 +214,12 @@ namespace Finder
             {
                 if (login_a)
                 {
-                    user = textBox1.Text;
-                    UpdateLog("User:\t"+user);
+                    userAccount = textBox1.Text;
+                    UpdateLog("User:\t" + userAccount);
                     textBox1.Text = "";
                     textBox1.ReadOnly = true;
                     UpdateText("Enter Password");
-                    
+
                     login_a = false;
                     login_p = true;
                     ReleaseCommand();
@@ -203,7 +230,9 @@ namespace Finder
                     textBox1.Text = "";
                     textBox1.ReadOnly = true;
                     login_p = false;
-                    UpdateLog(password);
+                    Login login = new Login(this);
+                    user = login.GetUser(userAccount, password);
+                    UpdateLog((user == null) ? "Welcome back " + user.Name + "!" : "Wrong account/password, please try again or type \"login -r\" to regist new account");
                     password = "";
                     showpwd_i = 0;
                     ReleaseCommand();
@@ -231,7 +260,7 @@ namespace Finder
                     break;
                 case "login":
                     UpdateLog(command);
-                    Login();
+                    Login(comopt);
                     break;
                 case "":
                     UpdateLog("");

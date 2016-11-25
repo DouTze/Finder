@@ -1,0 +1,810 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Database1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="BusStop">
+          <Key>
+            <PropertyRef Name="BSID" />
+          </Key>
+          <Property Name="BSID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="BSCID" Type="int" Nullable="false" />
+          <Property Name="Address" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Direction" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="District" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="Longitude" Type="float" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BusStopClass">
+          <Key>
+            <PropertyRef Name="BSCID" />
+          </Key>
+          <Property Name="BSCID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BusStopUpdateList">
+          <Key>
+            <PropertyRef Name="BSID" />
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="BSID" Type="int" Nullable="false" />
+          <Property Name="UID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="UpdateTime" Type="datetime" Nullable="false" />
+          <Property Name="Status" Type="varchar" MaxLength="8" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ElectricityBill">
+          <Key>
+            <PropertyRef Name="EBID" />
+          </Key>
+          <Property Name="EBID" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="EBYear" Type="smallint" Nullable="false" />
+          <Property Name="EBMonth" Type="smallint" Nullable="false" />
+          <Property Name="PayType" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="Address" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="KWh" Type="int" Nullable="false" />
+          <Property Name="TotalCost" Type="int" Nullable="false" />
+          <Property Name="ProcessNumber" Type="int" Nullable="false" />
+          <Property Name="TID" Type="int" Nullable="false" />
+          <Property Name="BSID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ElectricityBillUpdateList">
+          <Key>
+            <PropertyRef Name="EBID" />
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="EBID" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="UID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="UpdateTime" Type="datetime" Nullable="false" />
+          <Property Name="Status" Type="varchar" MaxLength="8" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Task">
+          <Key>
+            <PropertyRef Name="TID" />
+          </Key>
+          <Property Name="TID" Type="int" Nullable="false" />
+          <Property Name="TMID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="64" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaskClass">
+          <Key>
+            <PropertyRef Name="TCID" />
+          </Key>
+          <Property Name="TCID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TaskModel">
+          <Key>
+            <PropertyRef Name="TMID" />
+          </Key>
+          <Property Name="TMID" Type="int" Nullable="false" />
+          <Property Name="TCID" Type="int" Nullable="false" />
+          <Property Name="StepCount" Type="smallint" />
+        </EntityType>
+        <EntityType Name="TaskModelDetail">
+          <Key>
+            <PropertyRef Name="TMID" />
+            <PropertyRef Name="Step" />
+          </Key>
+          <Property Name="TMID" Type="int" Nullable="false" />
+          <Property Name="Step" Type="smallint" Nullable="false" />
+          <Property Name="Description" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="UID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Password" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="IV" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="50" />
+          <Property Name="Title" Type="varchar" MaxLength="20" />
+          <Property Name="Authority" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UserTask">
+          <Key>
+            <PropertyRef Name="UID" />
+            <PropertyRef Name="TID" />
+          </Key>
+          <Property Name="UID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TID" Type="int" Nullable="false" />
+          <Property Name="CreateTime" Type="datetime" Nullable="false" />
+          <Property Name="UpdateTime" Type="datetime" Nullable="false" />
+          <Property Name="Schedule" Type="text" Nullable="false" />
+        </EntityType>
+        <Association Name="BS_FK1">
+          <End Role="BusStopClass" Type="Self.BusStopClass" Multiplicity="1" />
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStopClass">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="BusStop">
+              <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BSUL_FK1">
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
+          <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="BusStopUpdateList">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BSUL_FK2">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="BusStopUpdateList">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EB_FK">
+          <End Role="Task" Type="Self.Task" Multiplicity="1" />
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TID" />
+            </Principal>
+            <Dependent Role="ElectricityBill">
+              <PropertyRef Name="TID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EB_FK2">
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="ElectricityBill">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EBUL_FK1">
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="1" />
+          <End Role="ElectricityBillUpdateList" Type="Self.ElectricityBillUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ElectricityBill">
+              <PropertyRef Name="EBID" />
+            </Principal>
+            <Dependent Role="ElectricityBillUpdateList">
+              <PropertyRef Name="EBID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EBUL_FK2">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="ElectricityBillUpdateList" Type="Self.ElectricityBillUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="ElectricityBillUpdateList">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="T_FK1">
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskModel">
+              <PropertyRef Name="TMID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="TMID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="TM_FK1">
+          <End Role="TaskClass" Type="Self.TaskClass" Multiplicity="1" />
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskClass">
+              <PropertyRef Name="TCID" />
+            </Principal>
+            <Dependent Role="TaskModel">
+              <PropertyRef Name="TCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="TMD_FK">
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="1" />
+          <End Role="TaskModelDetail" Type="Self.TaskModelDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskModel">
+              <PropertyRef Name="TMID" />
+            </Principal>
+            <Dependent Role="TaskModelDetail">
+              <PropertyRef Name="TMID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UT_FK1">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserTask" Type="Self.UserTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="UserTask">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UT_FK2">
+          <End Role="Task" Type="Self.Task" Multiplicity="1" />
+          <End Role="UserTask" Type="Self.UserTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TID" />
+            </Principal>
+            <Dependent Role="UserTask">
+              <PropertyRef Name="TID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Database1ModelStoreContainer">
+          <EntitySet Name="BusStop" EntityType="Self.BusStop" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BusStopClass" EntityType="Self.BusStopClass" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BusStopUpdateList" EntityType="Self.BusStopUpdateList" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ElectricityBill" EntityType="Self.ElectricityBill" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ElectricityBillUpdateList" EntityType="Self.ElectricityBillUpdateList" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Task" EntityType="Self.Task" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskClass" EntityType="Self.TaskClass" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskModel" EntityType="Self.TaskModel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TaskModelDetail" EntityType="Self.TaskModelDetail" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UserTask" EntityType="Self.UserTask" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="BS_FK1" Association="Self.BS_FK1">
+            <End Role="BusStopClass" EntitySet="BusStopClass" />
+            <End Role="BusStop" EntitySet="BusStop" />
+          </AssociationSet>
+          <AssociationSet Name="BSUL_FK1" Association="Self.BSUL_FK1">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="BSUL_FK2" Association="Self.BSUL_FK2">
+            <End Role="User" EntitySet="User" />
+            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EB_FK" Association="Self.EB_FK">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+          </AssociationSet>
+          <AssociationSet Name="EB_FK2" Association="Self.EB_FK2">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+          </AssociationSet>
+          <AssociationSet Name="EBUL_FK1" Association="Self.EBUL_FK1">
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+            <End Role="ElectricityBillUpdateList" EntitySet="ElectricityBillUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EBUL_FK2" Association="Self.EBUL_FK2">
+            <End Role="User" EntitySet="User" />
+            <End Role="ElectricityBillUpdateList" EntitySet="ElectricityBillUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="T_FK1" Association="Self.T_FK1">
+            <End Role="TaskModel" EntitySet="TaskModel" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="TM_FK1" Association="Self.TM_FK1">
+            <End Role="TaskClass" EntitySet="TaskClass" />
+            <End Role="TaskModel" EntitySet="TaskModel" />
+          </AssociationSet>
+          <AssociationSet Name="TMD_FK" Association="Self.TMD_FK">
+            <End Role="TaskModel" EntitySet="TaskModel" />
+            <End Role="TaskModelDetail" EntitySet="TaskModelDetail" />
+          </AssociationSet>
+          <AssociationSet Name="UT_FK1" Association="Self.UT_FK1">
+            <End Role="User" EntitySet="User" />
+            <End Role="UserTask" EntitySet="UserTask" />
+          </AssociationSet>
+          <AssociationSet Name="UT_FK2" Association="Self.UT_FK2">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="UserTask" EntitySet="UserTask" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="Database1Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="BusStop">
+          <Key>
+            <PropertyRef Name="BSID" />
+          </Key>
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BSCID" Type="Int32" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Direction" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
+          <Property Name="District" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Longitude" Type="Double" Nullable="false" />
+          <NavigationProperty Name="BusStopClass" Relationship="Self.BS_FK1" FromRole="BusStop" ToRole="BusStopClass" />
+          <NavigationProperty Name="BusStopUpdateList" Relationship="Self.BSUL_FK1" FromRole="BusStop" ToRole="BusStopUpdateList" />
+          <NavigationProperty Name="ElectricityBill" Relationship="Self.EB_FK2" FromRole="BusStop" ToRole="ElectricityBill" />
+        </EntityType>
+        <EntityType Name="BusStopClass">
+          <Key>
+            <PropertyRef Name="BSCID" />
+          </Key>
+          <Property Name="BSCID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="BusStop" Relationship="Self.BS_FK1" FromRole="BusStopClass" ToRole="BusStop" />
+        </EntityType>
+        <EntityType Name="BusStopUpdateList">
+          <Key>
+            <PropertyRef Name="BSID" />
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UpdateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="BusStop" Relationship="Self.BSUL_FK1" FromRole="BusStopUpdateList" ToRole="BusStop" />
+          <NavigationProperty Name="User" Relationship="Self.BSUL_FK2" FromRole="BusStopUpdateList" ToRole="User" />
+        </EntityType>
+        <EntityType Name="ElectricityBill">
+          <Key>
+            <PropertyRef Name="EBID" />
+          </Key>
+          <Property Name="EBID" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="EBYear" Type="Int16" Nullable="false" />
+          <Property Name="EBMonth" Type="Int16" Nullable="false" />
+          <Property Name="PayType" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="KWh" Type="Int32" Nullable="false" />
+          <Property Name="TotalCost" Type="Int32" Nullable="false" />
+          <Property Name="ProcessNumber" Type="Int32" Nullable="false" />
+          <Property Name="TID" Type="Int32" Nullable="false" />
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="BusStop" Relationship="Self.EB_FK2" FromRole="ElectricityBill" ToRole="BusStop" />
+          <NavigationProperty Name="Task" Relationship="Self.EB_FK" FromRole="ElectricityBill" ToRole="Task" />
+          <NavigationProperty Name="ElectricityBillUpdateList" Relationship="Self.EBUL_FK1" FromRole="ElectricityBill" ToRole="ElectricityBillUpdateList" />
+        </EntityType>
+        <EntityType Name="ElectricityBillUpdateList">
+          <Key>
+            <PropertyRef Name="EBID" />
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="EBID" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UpdateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Status" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="ElectricityBill" Relationship="Self.EBUL_FK1" FromRole="ElectricityBillUpdateList" ToRole="ElectricityBill" />
+          <NavigationProperty Name="User" Relationship="Self.EBUL_FK2" FromRole="ElectricityBillUpdateList" ToRole="User" />
+        </EntityType>
+        <EntityType Name="Task">
+          <Key>
+            <PropertyRef Name="TID" />
+          </Key>
+          <Property Name="TID" Type="Int32" Nullable="false" />
+          <Property Name="TMID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="64" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="ElectricityBill" Relationship="Self.EB_FK" FromRole="Task" ToRole="ElectricityBill" />
+          <NavigationProperty Name="TaskModel" Relationship="Self.T_FK1" FromRole="Task" ToRole="TaskModel" />
+          <NavigationProperty Name="UserTask" Relationship="Self.UT_FK2" FromRole="Task" ToRole="UserTask" />
+        </EntityType>
+        <EntityType Name="TaskClass">
+          <Key>
+            <PropertyRef Name="TCID" />
+          </Key>
+          <Property Name="TCID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="TaskModel" Relationship="Self.TM_FK1" FromRole="TaskClass" ToRole="TaskModel" />
+        </EntityType>
+        <EntityType Name="TaskModel">
+          <Key>
+            <PropertyRef Name="TMID" />
+          </Key>
+          <Property Name="TMID" Type="Int32" Nullable="false" />
+          <Property Name="TCID" Type="Int32" Nullable="false" />
+          <Property Name="StepCount" Type="Int16" />
+          <NavigationProperty Name="Task" Relationship="Self.T_FK1" FromRole="TaskModel" ToRole="Task" />
+          <NavigationProperty Name="TaskClass" Relationship="Self.TM_FK1" FromRole="TaskModel" ToRole="TaskClass" />
+          <NavigationProperty Name="TaskModelDetail" Relationship="Self.TMD_FK" FromRole="TaskModel" ToRole="TaskModelDetail" />
+        </EntityType>
+        <EntityType Name="TaskModelDetail">
+          <Key>
+            <PropertyRef Name="TMID" />
+            <PropertyRef Name="Step" />
+          </Key>
+          <Property Name="TMID" Type="Int32" Nullable="false" />
+          <Property Name="Step" Type="Int16" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="TaskModel" Relationship="Self.TMD_FK" FromRole="TaskModelDetail" ToRole="TaskModel" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="UID" />
+          </Key>
+          <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Password" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="IV" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Authority" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="BusStopUpdateList" Relationship="Self.BSUL_FK2" FromRole="User" ToRole="BusStopUpdateList" />
+          <NavigationProperty Name="ElectricityBillUpdateList" Relationship="Self.EBUL_FK2" FromRole="User" ToRole="ElectricityBillUpdateList" />
+          <NavigationProperty Name="UserTask" Relationship="Self.UT_FK1" FromRole="User" ToRole="UserTask" />
+        </EntityType>
+        <EntityType Name="UserTask">
+          <Key>
+            <PropertyRef Name="UID" />
+            <PropertyRef Name="TID" />
+          </Key>
+          <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TID" Type="Int32" Nullable="false" />
+          <Property Name="CreateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UpdateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Schedule" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Task" Relationship="Self.UT_FK2" FromRole="UserTask" ToRole="Task" />
+          <NavigationProperty Name="User" Relationship="Self.UT_FK1" FromRole="UserTask" ToRole="User" />
+        </EntityType>
+        <Association Name="BS_FK1">
+          <End Role="BusStopClass" Type="Self.BusStopClass" Multiplicity="1" />
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStopClass">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="BusStop">
+              <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BSUL_FK1">
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
+          <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="BusStopUpdateList">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EB_FK2">
+          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="ElectricityBill">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BSUL_FK2">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="BusStopUpdateList">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EB_FK">
+          <End Role="Task" Type="Self.Task" Multiplicity="1" />
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TID" />
+            </Principal>
+            <Dependent Role="ElectricityBill">
+              <PropertyRef Name="TID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EBUL_FK1">
+          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="1" />
+          <End Role="ElectricityBillUpdateList" Type="Self.ElectricityBillUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ElectricityBill">
+              <PropertyRef Name="EBID" />
+            </Principal>
+            <Dependent Role="ElectricityBillUpdateList">
+              <PropertyRef Name="EBID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EBUL_FK2">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="ElectricityBillUpdateList" Type="Self.ElectricityBillUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="ElectricityBillUpdateList">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="T_FK1">
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="1" />
+          <End Role="Task" Type="Self.Task" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskModel">
+              <PropertyRef Name="TMID" />
+            </Principal>
+            <Dependent Role="Task">
+              <PropertyRef Name="TMID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UT_FK2">
+          <End Role="Task" Type="Self.Task" Multiplicity="1" />
+          <End Role="UserTask" Type="Self.UserTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Task">
+              <PropertyRef Name="TID" />
+            </Principal>
+            <Dependent Role="UserTask">
+              <PropertyRef Name="TID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="TM_FK1">
+          <End Role="TaskClass" Type="Self.TaskClass" Multiplicity="1" />
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskClass">
+              <PropertyRef Name="TCID" />
+            </Principal>
+            <Dependent Role="TaskModel">
+              <PropertyRef Name="TCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="TMD_FK">
+          <End Role="TaskModel" Type="Self.TaskModel" Multiplicity="1" />
+          <End Role="TaskModelDetail" Type="Self.TaskModelDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TaskModel">
+              <PropertyRef Name="TMID" />
+            </Principal>
+            <Dependent Role="TaskModelDetail">
+              <PropertyRef Name="TMID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UT_FK1">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserTask" Type="Self.UserTask" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="UID" />
+            </Principal>
+            <Dependent Role="UserTask">
+              <PropertyRef Name="UID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Database1Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="BusStop" EntityType="Self.BusStop" />
+          <EntitySet Name="BusStopClass" EntityType="Self.BusStopClass" />
+          <EntitySet Name="BusStopUpdateList" EntityType="Self.BusStopUpdateList" />
+          <EntitySet Name="ElectricityBill" EntityType="Self.ElectricityBill" />
+          <EntitySet Name="ElectricityBillUpdateList" EntityType="Self.ElectricityBillUpdateList" />
+          <EntitySet Name="Task" EntityType="Self.Task" />
+          <EntitySet Name="TaskClass" EntityType="Self.TaskClass" />
+          <EntitySet Name="TaskModel" EntityType="Self.TaskModel" />
+          <EntitySet Name="TaskModelDetail" EntityType="Self.TaskModelDetail" />
+          <EntitySet Name="User" EntityType="Self.User" />
+          <EntitySet Name="UserTask" EntityType="Self.UserTask" />
+          <AssociationSet Name="BS_FK1" Association="Self.BS_FK1">
+            <End Role="BusStopClass" EntitySet="BusStopClass" />
+            <End Role="BusStop" EntitySet="BusStop" />
+          </AssociationSet>
+          <AssociationSet Name="BSUL_FK1" Association="Self.BSUL_FK1">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EB_FK2" Association="Self.EB_FK2">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+          </AssociationSet>
+          <AssociationSet Name="BSUL_FK2" Association="Self.BSUL_FK2">
+            <End Role="User" EntitySet="User" />
+            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EB_FK" Association="Self.EB_FK">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+          </AssociationSet>
+          <AssociationSet Name="EBUL_FK1" Association="Self.EBUL_FK1">
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+            <End Role="ElectricityBillUpdateList" EntitySet="ElectricityBillUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EBUL_FK2" Association="Self.EBUL_FK2">
+            <End Role="User" EntitySet="User" />
+            <End Role="ElectricityBillUpdateList" EntitySet="ElectricityBillUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="T_FK1" Association="Self.T_FK1">
+            <End Role="TaskModel" EntitySet="TaskModel" />
+            <End Role="Task" EntitySet="Task" />
+          </AssociationSet>
+          <AssociationSet Name="UT_FK2" Association="Self.UT_FK2">
+            <End Role="Task" EntitySet="Task" />
+            <End Role="UserTask" EntitySet="UserTask" />
+          </AssociationSet>
+          <AssociationSet Name="TM_FK1" Association="Self.TM_FK1">
+            <End Role="TaskClass" EntitySet="TaskClass" />
+            <End Role="TaskModel" EntitySet="TaskModel" />
+          </AssociationSet>
+          <AssociationSet Name="TMD_FK" Association="Self.TMD_FK">
+            <End Role="TaskModel" EntitySet="TaskModel" />
+            <End Role="TaskModelDetail" EntitySet="TaskModelDetail" />
+          </AssociationSet>
+          <AssociationSet Name="UT_FK1" Association="Self.UT_FK1">
+            <End Role="User" EntitySet="User" />
+            <End Role="UserTask" EntitySet="UserTask" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Database1ModelStoreContainer" CdmEntityContainer="Database1Entities">
+          <EntitySetMapping Name="BusStop">
+            <EntityTypeMapping TypeName="Database1Model.BusStop">
+              <MappingFragment StoreEntitySet="BusStop">
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="Direction" ColumnName="Direction" />
+                <ScalarProperty Name="District" ColumnName="District" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BusStopClass">
+            <EntityTypeMapping TypeName="Database1Model.BusStopClass">
+              <MappingFragment StoreEntitySet="BusStopClass">
+                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BusStopUpdateList">
+            <EntityTypeMapping TypeName="Database1Model.BusStopUpdateList">
+              <MappingFragment StoreEntitySet="BusStopUpdateList">
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
+                <ScalarProperty Name="UID" ColumnName="UID" />
+                <ScalarProperty Name="UpdateTime" ColumnName="UpdateTime" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ElectricityBill">
+            <EntityTypeMapping TypeName="Database1Model.ElectricityBill">
+              <MappingFragment StoreEntitySet="ElectricityBill">
+                <ScalarProperty Name="EBID" ColumnName="EBID" />
+                <ScalarProperty Name="EBYear" ColumnName="EBYear" />
+                <ScalarProperty Name="EBMonth" ColumnName="EBMonth" />
+                <ScalarProperty Name="PayType" ColumnName="PayType" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="KWh" ColumnName="KWh" />
+                <ScalarProperty Name="TotalCost" ColumnName="TotalCost" />
+                <ScalarProperty Name="ProcessNumber" ColumnName="ProcessNumber" />
+                <ScalarProperty Name="TID" ColumnName="TID" />
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ElectricityBillUpdateList">
+            <EntityTypeMapping TypeName="Database1Model.ElectricityBillUpdateList">
+              <MappingFragment StoreEntitySet="ElectricityBillUpdateList">
+                <ScalarProperty Name="EBID" ColumnName="EBID" />
+                <ScalarProperty Name="UID" ColumnName="UID" />
+                <ScalarProperty Name="UpdateTime" ColumnName="UpdateTime" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Task">
+            <EntityTypeMapping TypeName="Database1Model.Task">
+              <MappingFragment StoreEntitySet="Task">
+                <ScalarProperty Name="TID" ColumnName="TID" />
+                <ScalarProperty Name="TMID" ColumnName="TMID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskClass">
+            <EntityTypeMapping TypeName="Database1Model.TaskClass">
+              <MappingFragment StoreEntitySet="TaskClass">
+                <ScalarProperty Name="TCID" ColumnName="TCID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskModel">
+            <EntityTypeMapping TypeName="Database1Model.TaskModel">
+              <MappingFragment StoreEntitySet="TaskModel">
+                <ScalarProperty Name="TMID" ColumnName="TMID" />
+                <ScalarProperty Name="TCID" ColumnName="TCID" />
+                <ScalarProperty Name="StepCount" ColumnName="StepCount" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TaskModelDetail">
+            <EntityTypeMapping TypeName="Database1Model.TaskModelDetail">
+              <MappingFragment StoreEntitySet="TaskModelDetail">
+                <ScalarProperty Name="TMID" ColumnName="TMID" />
+                <ScalarProperty Name="Step" ColumnName="Step" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="User">
+            <EntityTypeMapping TypeName="Database1Model.User">
+              <MappingFragment StoreEntitySet="User">
+                <ScalarProperty Name="UID" ColumnName="UID" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="IV" ColumnName="IV" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Authority" ColumnName="Authority" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserTask">
+            <EntityTypeMapping TypeName="Database1Model.UserTask">
+              <MappingFragment StoreEntitySet="UserTask">
+                <ScalarProperty Name="UID" ColumnName="UID" />
+                <ScalarProperty Name="TID" ColumnName="TID" />
+                <ScalarProperty Name="CreateTime" ColumnName="CreateTime" />
+                <ScalarProperty Name="UpdateTime" ColumnName="UpdateTime" />
+                <ScalarProperty Name="Schedule" ColumnName="Schedule" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="true" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

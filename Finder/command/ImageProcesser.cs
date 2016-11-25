@@ -51,7 +51,7 @@ namespace Finder
 
             reg.UpdateLog("Cut image");
             reg.UpdateText("Recognize address");
-            TesseractEngine ocr = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "chi_tra+eng", EngineMode.Default);
+            TesseractEngine ocr = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "chi_tra+eng", EngineMode.Default);
             Pix img = PixConverter.ToPix(targets[1]);
             Page addpage = ocr.Process(img);
             string[] address = addpage.GetText().Trim().Split(new char[] { '：', ':', '︰' });
@@ -61,7 +61,7 @@ namespace Finder
             reg.UpdateLog("Recognize address");
             reg.UpdateText("Recognize eid, date, price");
             Pix idpimg = PixConverter.ToPix(targets[2]);
-            TesseractEngine ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng", EngineMode.Default);
+            TesseractEngine ocre = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "eng", EngineMode.Default);
             Page idppage = ocre.Process(idpimg);
             string[] idpdata = idppage.GetText().Trim().Split(' ');
             int tar = 0;
@@ -85,7 +85,7 @@ namespace Finder
             reg.UpdateLog("Recognize eid, date, price\n");
             reg.UpdateText("Recognize kWh");
             Pix kwhimg = PixConverter.ToPix(targets[0]);
-            ocre = new TesseractEngine(@"C:\Program Files (x86)\Tesseract-OCR\tessdata", "eng", EngineMode.Default);
+            ocre = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "eng", EngineMode.Default);
             Page kwhpage = ocre.Process(kwhimg);
             string[] kwhdata = kwhpage.GetText().Trim().Split(' ');
             string kwh = "";

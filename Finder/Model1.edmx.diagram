@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="4fcf3e3ae33543a1ab67d66f52f524ad" Name="Diagram1">
+        <EntityTypeShape EntityType="Database1Model.BusStop" Width="1.5" PointX="1.5" PointY="14.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="1.5" PointY="18" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStopUpdateList" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.ElectricityBill" Width="1.5" PointX="0.75" PointY="9.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.ElectricityBillUpdateList" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Task" Width="1.5" PointX="1.5" PointY="21" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskClass" Width="1.5" PointX="1.5" PointY="27.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskModel" Width="1.5" PointX="1.5" PointY="24" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskModelDetail" Width="1.5" PointX="3.75" PointY="24.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.User" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.UserTask" Width="1.5" PointX="3" PointY="7.125" IsExpanded="true" />
+        <AssociationConnector Association="Database1Model.BS_FK1" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.BSUL_FK1" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.EB_FK2" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.BSUL_FK2" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.EB_FK" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.EBUL_FK1" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.EBUL_FK2" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.T_FK1" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.UT_FK2" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.TM_FK1" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.TMD_FK" ManuallyRouted="false" />
+        <AssociationConnector Association="Database1Model.UT_FK1" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
