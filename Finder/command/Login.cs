@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
-using System.Security;
 using System.Security.Cryptography;
 using System.IO;
+using System.Data.SqlClient;
 
 namespace Finder
 {
     class Login
     {
-        private Database1Entities db = new Database1Entities();
+        Database1Entities db = new Database1Entities();
         private byte[] salt = new byte[] { 0x0A, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0xF1 };
         RecognizeForm form;
         public Login(RecognizeForm form)
@@ -49,7 +48,6 @@ namespace Finder
                 encrypt = Convert.ToBase64String(ms.ToArray());
             }
             form.UpdateLog("Encrypt password");
-
             user = new User();
             user.UID = account;
             user.Password = encrypt;
@@ -78,7 +76,7 @@ namespace Finder
             byte[] keyData = rfcKey.GetBytes(16);
             aes.Key = keyData;
 
-            byte[] iv = Encoding.ASCII.GetBytes(user.IV);
+            byte[] iv = Convert.FromBase64String(user.IV);
             aes.IV = iv;
 
             bool isPasswordCorrect = false;

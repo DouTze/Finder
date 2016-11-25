@@ -82,27 +82,30 @@ namespace Finder
                 login_a = true;
                 ReleaseCommand();
             }
-            string option = args[1];
-            try
+            else
             {
-                switch (option)
+                string option = args[1];
+                try
                 {
-                    case "-r":
-                        Login login = new Login(this);
-                        UpdateLog(login.CreateUser(args[2], args[3], args[4], args[5], args[6]) ? "Create successful" : "Create failed");
-                        textBox1.Text = "";
-                        ReleaseCommand();
-                        break;
-                    default:
-                        UpdateLog("Option [ " + option + " ] not found");
-                        ReleaseCommand();
-                        break;
+                    switch (option)
+                    {
+                        case "-r":
+                            Login login = new Login(this);
+                            UpdateLog(login.CreateUser(args[2], args[3], args[4], args[5], args[6]) ? "Create successful" : "Create failed");
+                            textBox1.Text = "";
+                            ReleaseCommand();
+                            break;
+                        default:
+                            UpdateLog("Option [ " + option + " ] not found");
+                            ReleaseCommand();
+                            break;
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                UpdateLog(e.Message);
-                ReleaseCommand();
+                catch (Exception e)
+                {
+                    UpdateLog(e.Message);
+                    ReleaseCommand();
+                }
             }
             
         }
@@ -232,7 +235,7 @@ namespace Finder
                     login_p = false;
                     Login login = new Login(this);
                     user = login.GetUser(userAccount, password);
-                    UpdateLog((user == null) ? "Welcome back " + user.Name + "!" : "Wrong account/password, please try again or type \"login -r\" to regist new account");
+                    UpdateLog((user != null) ? "Welcome back " + user.Name + "!" : "Wrong account/password, please try again or type \"login -r\" to regist new account");
                     password = "";
                     showpwd_i = 0;
                     ReleaseCommand();
