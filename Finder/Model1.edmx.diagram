@@ -5,17 +5,17 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="069bba7e50bf4f778a33dc9a40d683ab" Name="Diagram1">
-        <EntityTypeShape EntityType="Database1Model.BusStop" Width="1.5" PointX="1.5" PointY="14.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="1.5" PointY="18" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.BusStopUpdateList" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.ElectricityBill" Width="1.5" PointX="0.75" PointY="9.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.ElectricityBillUpdateList" Width="1.5" PointX="3" PointY="1.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.Task" Width="1.5" PointX="1.5" PointY="21" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.TaskClass" Width="1.5" PointX="1.5" PointY="27.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.TaskModel" Width="1.5" PointX="1.5" PointY="24" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.TaskModelDetail" Width="1.5" PointX="3.75" PointY="24.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.User" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.UserTask" Width="1.5" PointX="3" PointY="7.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStop" Width="1.5" PointX="5.375" PointY="9.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="7.5" PointY="10" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStopUpdateList" Width="1.5" PointX="3.125" PointY="9.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.ElectricityBill" Width="1.5" PointX="5.375" PointY="5.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.ElectricityBillUpdateList" Width="1.5" PointX="3.125" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.Task" Width="1.5" PointX="5.375" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskClass" Width="1.5" PointX="7.5" PointY="15.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskModel" Width="1.5" PointX="7.5" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskModelDetail" Width="1.5" PointX="9.5" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.User" Width="1.5" PointX="1.25" PointY="9.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.UserTask" Width="1.5" PointX="3.125" PointY="12.875" IsExpanded="true" />
         <AssociationConnector Association="Database1Model.BS_FK1" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.BSUL_FK1" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.EB_FK2" ManuallyRouted="false" />

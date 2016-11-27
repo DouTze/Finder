@@ -25,7 +25,7 @@ namespace Finder
         private bool login_p = false;
         private string userAccount = "";
         private string password = "";
-        private User user;
+        public User user;
 
         public RecognizeForm()
         {
@@ -72,7 +72,13 @@ namespace Finder
             }
         }
 
-        private void Login(string[] args)
+        private void WhoAmI()
+        {
+            textBox1.Text = "";
+            UpdateLog((user != null) ? user.Name : "unknown user");
+        }
+
+        private void RunLogin(string[] args)
         {
             if (args.Length == 1)
             {
@@ -87,12 +93,22 @@ namespace Finder
                 string option = args[1];
                 try
                 {
-                    switch (option)
+                    switch (option.Substring(0,2))
                     {
                         case "-r":
-                            Login login = new Login(this);
-                            UpdateLog(login.CreateUser(args[2], args[3], args[4], args[5], args[6]) ? "Create successful" : "Create failed");
                             textBox1.Text = "";
+                            Thread ul = new Thread(new ParameterizedThreadStart(Login.CreateUser));
+                            ul.IsBackground = true;
+                            ul.Start(new object[] { args[2], args[3], args[4], args[5], args[6], this });
+
+                            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+                            loadingAnime.IsBackground = true;
+                            loadingAnime.Start(ul);
+                            break;
+                        case "-q":
+                            textBox1.Text = "";
+                            user = null;
+                            UpdateLog("Logout successful");
                             ReleaseCommand();
                             break;
                         default:
@@ -233,12 +249,20 @@ namespace Finder
                     textBox1.Text = "";
                     textBox1.ReadOnly = true;
                     login_p = false;
-                    Login login = new Login(this);
-                    user = login.GetUser(userAccount, password);
-                    UpdateLog((user != null) ? "Welcome back " + user.Name + "!" : "Wrong account/password, please try again or type \"login -r\" to regist new account");
+                    //user = login.GetUser(userAccount, password);
+                    textBox1.Text = "";
+
+                    Thread li = new Thread(new ParameterizedThreadStart(Login.GetUser));
+                    li.IsBackground = true;
+                    li.Start(new object[] { userAccount, password, this});
+
+                    Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+                    loadingAnime.IsBackground = true;
+                    loadingAnime.Start(li);
+
                     password = "";
                     showpwd_i = 0;
-                    ReleaseCommand();
+                    spd = "";
                 }
                 else
                 {
@@ -263,7 +287,12 @@ namespace Finder
                     break;
                 case "login":
                     UpdateLog(command);
-                    Login(comopt);
+                    RunLogin(comopt);
+                    break;
+                case "whoami":
+                    UpdateLog(command);
+                    WhoAmI();
+                    ReleaseCommand();
                     break;
                 case "":
                     UpdateLog("");
