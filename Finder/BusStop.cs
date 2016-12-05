@@ -26,7 +26,8 @@ namespace Finder
         public string Address { get; set; }
         public string Direction { get; set; }
         public string District { get; set; }
-        public double Longitude { get; set; }
+        public Nullable<double> Longitude { get; set; }
+        public Nullable<double> Latitude { get; set; }
     
         public virtual BusStopClass BusStopClass { get; set; }
         public virtual ICollection<BusStopUpdateList> BusStopUpdateList { get; set; }

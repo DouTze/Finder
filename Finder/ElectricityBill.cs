@@ -30,8 +30,8 @@ namespace Finder
         public int TID { get; set; }
         public int BSID { get; set; }
     
-        public virtual BusStop BusStop { get; set; }
         public virtual Task Task { get; set; }
         public virtual ICollection<ElectricityBillUpdateList> ElectricityBillUpdateList { get; set; }
+        public virtual BusStop BusStop { get; set; }
     }
 }

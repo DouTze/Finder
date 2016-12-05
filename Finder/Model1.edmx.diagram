@@ -5,20 +5,16 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="069bba7e50bf4f778a33dc9a40d683ab" Name="Diagram1">
-        <EntityTypeShape EntityType="Database1Model.BusStop" Width="1.5" PointX="5.375" PointY="9.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="7.5" PointY="10" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="7.5" PointY="9.875" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.BusStopUpdateList" Width="1.5" PointX="3.125" PointY="9.625" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.ElectricityBill" Width="1.5" PointX="5.375" PointY="5.5" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.ElectricityBillUpdateList" Width="1.5" PointX="3.125" PointY="6.625" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.Task" Width="1.5" PointX="5.375" PointY="12.875" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.TaskClass" Width="1.5" PointX="7.5" PointY="15.5" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.TaskModel" Width="1.5" PointX="7.5" PointY="12.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.TaskModelDetail" Width="1.5" PointX="9.5" PointY="12.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Database1Model.TaskModelDetail" Width="1.5" PointX="9.5" PointY="13.125" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.User" Width="1.5" PointX="1.25" PointY="9.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="Database1Model.UserTask" Width="1.5" PointX="3.125" PointY="12.875" IsExpanded="true" />
-        <AssociationConnector Association="Database1Model.BS_FK1" ManuallyRouted="false" />
-        <AssociationConnector Association="Database1Model.BSUL_FK1" ManuallyRouted="false" />
-        <AssociationConnector Association="Database1Model.EB_FK2" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="Database1Model.UserTask" Width="1.5" PointX="3.125" PointY="12.75" IsExpanded="true" />
         <AssociationConnector Association="Database1Model.BSUL_FK2" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.EB_FK" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.EBUL_FK1" ManuallyRouted="false" />
@@ -28,7 +24,11 @@
         <AssociationConnector Association="Database1Model.TM_FK1" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.TMD_FK" ManuallyRouted="false" />
         <AssociationConnector Association="Database1Model.UT_FK1" ManuallyRouted="false" />
-      </Diagram>
+        <EntityTypeShape EntityType="Database1Model.BusStop" Width="1.5" PointX="5.375" PointY="9.25" />
+        <AssociationConnector Association="Database1Model.BS_FK1" />
+        <AssociationConnector Association="Database1Model.BSUL_FK1" />
+        <AssociationConnector Association="Database1Model.EB_FK2" />
+        </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
 </edmx:Edmx>

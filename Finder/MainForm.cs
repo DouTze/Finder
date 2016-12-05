@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.Drawing;
+using Finder.command;
 
 
 namespace Finder
@@ -39,7 +40,7 @@ namespace Finder
         }
 
 
-        private void FindTarget()
+        private void ElectricityBill(string[] args)
         {
             textBox1.Text = "";
 
@@ -69,6 +70,99 @@ namespace Finder
                 Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
                 loadingAnime.IsBackground = true;
                 loadingAnime.Start(a2b);
+            }
+        }
+
+        private void MakeTaskModel(string[] args)
+        {
+            textBox1.Text = "";
+
+            if (args.Length < 3)
+            {
+                UpdateLog("Command \"mktm\" need 2 args");
+            }
+            else
+            {
+                string option = args[1];
+                try
+                {
+                    Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+                    switch (option)
+                    {
+                        case "-ntm":
+                            break;
+                        case "-ntc":
+                            textBox1.Text = "";
+                            Thread ntc = new Thread(new ParameterizedThreadStart(TaskModelGenerator.CreateTaskClass));
+                            ntc.IsBackground = true;
+                            ntc.Start(new object[] { args[2] });
+
+                            loadingAnime.IsBackground = true;
+                            loadingAnime.Start(ntc);
+                            break;
+                        case "-lstc":
+                            textBox1.Text = "";
+                            Thread lstc = new Thread(new ParameterizedThreadStart(TaskModelGenerator.ShowTaskClass));
+                            lstc.IsBackground = true;
+                            lstc.Start(new object[] { this });
+
+                            loadingAnime.IsBackground = true;
+                            loadingAnime.Start(lstc);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    UpdateLog(e.Message);
+                    ReleaseCommand();
+                }
+            }
+        }
+
+        private void BusStopFunction(string[] args)
+        {
+            textBox1.Text = "";
+
+            if (args.Length < 3)
+            {
+                UpdateLog("Command \"bs\" need 2 args");
+            }
+            else
+            {
+                string option = args[1];
+                try
+                {
+                    Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+                    switch (option)
+                    {
+                        case "-import":
+                            string[] filename = args[2].Split('.');
+                            if (!filename[filename.Length - 1].Equals("csv"))
+                            {
+                                loadingAnime = null;
+                                UpdateLog("Only support CSV file, please check file format and try again");
+                                ReleaseCommand();
+                                break;
+                            }
+                            textBox1.Text = "";
+                            Thread import = new Thread(new ParameterizedThreadStart(BusStopGenerator.ImportBusStop));
+                            import.IsBackground = true;
+                            import.Start(new object[] { args[2], this });
+
+                            loadingAnime.IsBackground = true;
+                            loadingAnime.Start(import);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    UpdateLog(e.Message);
+                    ReleaseCommand();
+                }
             }
         }
 
@@ -277,9 +371,9 @@ namespace Finder
             String[] comopt = command.Trim().Split(' ');
             switch (comopt[0])
             {
-                case "findtarget":
+                case "eb":
                     UpdateLog(command);
-                    FindTarget();
+                    ElectricityBill(comopt);
                     break;
                 case "a2b":
                     UpdateLog(command);
@@ -288,6 +382,14 @@ namespace Finder
                 case "login":
                     UpdateLog(command);
                     RunLogin(comopt);
+                    break;
+                case "mktm":
+                    UpdateLog(command);
+                    MakeTaskModel(comopt);
+                    break;
+                case "bs":
+                    UpdateLog(command);
+                    BusStopFunction(comopt);
                     break;
                 case "whoami":
                     UpdateLog(command);

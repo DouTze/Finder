@@ -4,25 +4,26 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="Database1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="Database1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="BusStop">
           <Key>
             <PropertyRef Name="BSID" />
           </Key>
-          <Property Name="BSID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="BSID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="BSCID" Type="int" Nullable="false" />
-          <Property Name="Address" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="Direction" Type="char" MaxLength="1" Nullable="false" />
-          <Property Name="District" Type="varchar" MaxLength="5" Nullable="false" />
-          <Property Name="Longitude" Type="float" Nullable="false" />
+          <Property Name="Address" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Direction" Type="nchar" MaxLength="1" Nullable="false" />
+          <Property Name="District" Type="nvarchar" MaxLength="5" Nullable="false" />
+          <Property Name="Longitude" Type="float" />
+          <Property Name="Latitude" Type="float" />
         </EntityType>
         <EntityType Name="BusStopClass">
           <Key>
             <PropertyRef Name="BSCID" />
           </Key>
-          <Property Name="BSCID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
+          <Property Name="BSCID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="25" Nullable="false" />
         </EntityType>
         <EntityType Name="BusStopUpdateList">
           <Key>
@@ -41,8 +42,8 @@
           <Property Name="EBID" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="EBYear" Type="smallint" Nullable="false" />
           <Property Name="EBMonth" Type="smallint" Nullable="false" />
-          <Property Name="PayType" Type="varchar" MaxLength="5" Nullable="false" />
-          <Property Name="Address" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="PayType" Type="nvarchar" MaxLength="5" Nullable="false" />
+          <Property Name="Address" Type="nvarchar" MaxLength="50" Nullable="false" />
           <Property Name="KWh" Type="int" Nullable="false" />
           <Property Name="TotalCost" Type="int" Nullable="false" />
           <Property Name="ProcessNumber" Type="int" Nullable="false" />
@@ -65,14 +66,14 @@
           </Key>
           <Property Name="TID" Type="int" Nullable="false" />
           <Property Name="TMID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="64" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="64" Nullable="false" />
         </EntityType>
         <EntityType Name="TaskClass">
           <Key>
             <PropertyRef Name="TCID" />
           </Key>
           <Property Name="TCID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="25" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="25" Nullable="false" />
         </EntityType>
         <EntityType Name="TaskModel">
           <Key>
@@ -89,7 +90,7 @@
           </Key>
           <Property Name="TMID" Type="int" Nullable="false" />
           <Property Name="Step" Type="smallint" Nullable="false" />
-          <Property Name="Description" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <EntityType Name="User">
           <Key>
@@ -98,9 +99,9 @@
           <Property Name="UID" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Password" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="IV" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="20" Nullable="false" />
           <Property Name="Email" Type="varchar" MaxLength="50" />
-          <Property Name="Title" Type="varchar" MaxLength="20" />
+          <Property Name="Title" Type="nvarchar" MaxLength="20" />
           <Property Name="Authority" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="UserTask">
@@ -319,33 +320,17 @@
             <End Role="UserTask" EntitySet="UserTask" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="Database1Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="BusStop">
-          <Key>
-            <PropertyRef Name="BSID" />
-          </Key>
-          <Property Name="BSID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="BSCID" Type="Int32" Nullable="false" />
-          <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Direction" Type="String" MaxLength="1" FixedLength="true" Unicode="false" Nullable="false" />
-          <Property Name="District" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Longitude" Type="Double" Nullable="false" />
-          <NavigationProperty Name="BusStopClass" Relationship="Self.BS_FK1" FromRole="BusStop" ToRole="BusStopClass" />
-          <NavigationProperty Name="BusStopUpdateList" Relationship="Self.BSUL_FK1" FromRole="BusStop" ToRole="BusStopUpdateList" />
-          <NavigationProperty Name="ElectricityBill" Relationship="Self.EB_FK2" FromRole="BusStop" ToRole="ElectricityBill" />
-        </EntityType>
         <EntityType Name="BusStopClass">
           <Key>
             <PropertyRef Name="BSCID" />
           </Key>
           <Property Name="BSCID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="BusStop" Relationship="Self.BS_FK1" FromRole="BusStopClass" ToRole="BusStop" />
+          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="BusStop" Relationship="Database1Model.BS_FK1" FromRole="BusStopClass" ToRole="BusStop" />
         </EntityType>
         <EntityType Name="BusStopUpdateList">
           <Key>
@@ -356,8 +341,8 @@
           <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="UpdateTime" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="Status" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="BusStop" Relationship="Self.BSUL_FK1" FromRole="BusStopUpdateList" ToRole="BusStop" />
           <NavigationProperty Name="User" Relationship="Self.BSUL_FK2" FromRole="BusStopUpdateList" ToRole="User" />
+          <NavigationProperty Name="BusStop" Relationship="Database1Model.BSUL_FK1" FromRole="BusStopUpdateList" ToRole="BusStop" />
         </EntityType>
         <EntityType Name="ElectricityBill">
           <Key>
@@ -366,16 +351,16 @@
           <Property Name="EBID" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EBYear" Type="Int16" Nullable="false" />
           <Property Name="EBMonth" Type="Int16" Nullable="false" />
-          <Property Name="PayType" Type="String" MaxLength="5" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PayType" Type="String" MaxLength="5" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Address" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="KWh" Type="Int32" Nullable="false" />
           <Property Name="TotalCost" Type="Int32" Nullable="false" />
           <Property Name="ProcessNumber" Type="Int32" Nullable="false" />
           <Property Name="TID" Type="Int32" Nullable="false" />
           <Property Name="BSID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="BusStop" Relationship="Self.EB_FK2" FromRole="ElectricityBill" ToRole="BusStop" />
           <NavigationProperty Name="Task" Relationship="Self.EB_FK" FromRole="ElectricityBill" ToRole="Task" />
           <NavigationProperty Name="ElectricityBillUpdateList" Relationship="Self.EBUL_FK1" FromRole="ElectricityBill" ToRole="ElectricityBillUpdateList" />
+          <NavigationProperty Name="BusStop" Relationship="Database1Model.EB_FK2" FromRole="ElectricityBill" ToRole="BusStop" />
         </EntityType>
         <EntityType Name="ElectricityBillUpdateList">
           <Key>
@@ -395,7 +380,7 @@
           </Key>
           <Property Name="TID" Type="Int32" Nullable="false" />
           <Property Name="TMID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="64" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="64" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="ElectricityBill" Relationship="Self.EB_FK" FromRole="Task" ToRole="ElectricityBill" />
           <NavigationProperty Name="TaskModel" Relationship="Self.T_FK1" FromRole="Task" ToRole="TaskModel" />
           <NavigationProperty Name="UserTask" Relationship="Self.UT_FK2" FromRole="Task" ToRole="UserTask" />
@@ -405,7 +390,7 @@
             <PropertyRef Name="TCID" />
           </Key>
           <Property Name="TCID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="25" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="TaskModel" Relationship="Self.TM_FK1" FromRole="TaskClass" ToRole="TaskModel" />
         </EntityType>
         <EntityType Name="TaskModel">
@@ -426,7 +411,7 @@
           </Key>
           <Property Name="TMID" Type="Int32" Nullable="false" />
           <Property Name="Step" Type="Int16" Nullable="false" />
-          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
           <NavigationProperty Name="TaskModel" Relationship="Self.TMD_FK" FromRole="TaskModelDetail" ToRole="TaskModel" />
         </EntityType>
         <EntityType Name="User">
@@ -436,9 +421,9 @@
           <Property Name="UID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Password" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="IV" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Title" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="Authority" Type="Int32" Nullable="false" />
           <NavigationProperty Name="BusStopUpdateList" Relationship="Self.BSUL_FK2" FromRole="User" ToRole="BusStopUpdateList" />
           <NavigationProperty Name="ElectricityBillUpdateList" Relationship="Self.EBUL_FK2" FromRole="User" ToRole="ElectricityBillUpdateList" />
@@ -457,42 +442,6 @@
           <NavigationProperty Name="Task" Relationship="Self.UT_FK2" FromRole="UserTask" ToRole="Task" />
           <NavigationProperty Name="User" Relationship="Self.UT_FK1" FromRole="UserTask" ToRole="User" />
         </EntityType>
-        <Association Name="BS_FK1">
-          <End Role="BusStopClass" Type="Self.BusStopClass" Multiplicity="1" />
-          <End Role="BusStop" Type="Self.BusStop" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BusStopClass">
-              <PropertyRef Name="BSCID" />
-            </Principal>
-            <Dependent Role="BusStop">
-              <PropertyRef Name="BSCID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="BSUL_FK1">
-          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
-          <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BusStop">
-              <PropertyRef Name="BSID" />
-            </Principal>
-            <Dependent Role="BusStopUpdateList">
-              <PropertyRef Name="BSID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="EB_FK2">
-          <End Role="BusStop" Type="Self.BusStop" Multiplicity="1" />
-          <End Role="ElectricityBill" Type="Self.ElectricityBill" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BusStop">
-              <PropertyRef Name="BSID" />
-            </Principal>
-            <Dependent Role="ElectricityBill">
-              <PropertyRef Name="BSID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="BSUL_FK2">
           <End Role="User" Type="Self.User" Multiplicity="1" />
           <End Role="BusStopUpdateList" Type="Self.BusStopUpdateList" Multiplicity="*" />
@@ -602,7 +551,6 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="Database1Entities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="BusStop" EntityType="Self.BusStop" />
           <EntitySet Name="BusStopClass" EntityType="Self.BusStopClass" />
           <EntitySet Name="BusStopUpdateList" EntityType="Self.BusStopUpdateList" />
           <EntitySet Name="ElectricityBill" EntityType="Self.ElectricityBill" />
@@ -613,18 +561,6 @@
           <EntitySet Name="TaskModelDetail" EntityType="Self.TaskModelDetail" />
           <EntitySet Name="User" EntityType="Self.User" />
           <EntitySet Name="UserTask" EntityType="Self.UserTask" />
-          <AssociationSet Name="BS_FK1" Association="Self.BS_FK1">
-            <End Role="BusStopClass" EntitySet="BusStopClass" />
-            <End Role="BusStop" EntitySet="BusStop" />
-          </AssociationSet>
-          <AssociationSet Name="BSUL_FK1" Association="Self.BSUL_FK1">
-            <End Role="BusStop" EntitySet="BusStop" />
-            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
-          </AssociationSet>
-          <AssociationSet Name="EB_FK2" Association="Self.EB_FK2">
-            <End Role="BusStop" EntitySet="BusStop" />
-            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
-          </AssociationSet>
           <AssociationSet Name="BSUL_FK2" Association="Self.BSUL_FK2">
             <End Role="User" EntitySet="User" />
             <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
@@ -661,26 +597,78 @@
             <End Role="User" EntitySet="User" />
             <End Role="UserTask" EntitySet="UserTask" />
           </AssociationSet>
-        </EntityContainer>
-      </Schema>
+          <EntitySet Name="BusStop" EntityType="Database1Model.BusStop" />
+          <AssociationSet Name="BS_FK1" Association="Database1Model.BS_FK1">
+            <End Role="BusStopClass" EntitySet="BusStopClass" />
+            <End Role="BusStop" EntitySet="BusStop" />
+          </AssociationSet>
+          <AssociationSet Name="BSUL_FK1" Association="Database1Model.BSUL_FK1">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="BusStopUpdateList" EntitySet="BusStopUpdateList" />
+          </AssociationSet>
+          <AssociationSet Name="EB_FK2" Association="Database1Model.EB_FK2">
+            <End Role="BusStop" EntitySet="BusStop" />
+            <End Role="ElectricityBill" EntitySet="ElectricityBill" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="BusStop">
+          <Key>
+            <PropertyRef Name="BSID" />
+          </Key>
+          <Property Name="BSID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="BSCID" Type="Int32" Nullable="false" />
+          <Property Name="Address" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Direction" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="true" />
+          <Property Name="District" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="true" />
+          <Property Name="Longitude" Type="Double" />
+          <NavigationProperty Name="BusStopClass" Relationship="Database1Model.BS_FK1" FromRole="BusStop" ToRole="BusStopClass" />
+          <NavigationProperty Name="BusStopUpdateList" Relationship="Database1Model.BSUL_FK1" FromRole="BusStop" ToRole="BusStopUpdateList" />
+          <NavigationProperty Name="ElectricityBill" Relationship="Database1Model.EB_FK2" FromRole="BusStop" ToRole="ElectricityBill" />
+          <Property Name="Latitude" Type="Double" />
+        </EntityType>
+        <Association Name="BS_FK1">
+          <End Type="Database1Model.BusStopClass" Role="BusStopClass" Multiplicity="1" />
+          <End Type="Database1Model.BusStop" Role="BusStop" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStopClass">
+              <PropertyRef Name="BSCID" />
+            </Principal>
+            <Dependent Role="BusStop">
+              <PropertyRef Name="BSCID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BSUL_FK1">
+          <End Type="Database1Model.BusStop" Role="BusStop" Multiplicity="1" />
+          <End Type="Database1Model.BusStopUpdateList" Role="BusStopUpdateList" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="BusStopUpdateList">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="EB_FK2">
+          <End Type="Database1Model.BusStop" Role="BusStop" Multiplicity="1" />
+          <End Type="Database1Model.ElectricityBill" Role="ElectricityBill" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BusStop">
+              <PropertyRef Name="BSID" />
+            </Principal>
+            <Dependent Role="ElectricityBill">
+              <PropertyRef Name="BSID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="Database1ModelStoreContainer" CdmEntityContainer="Database1Entities">
-          <EntitySetMapping Name="BusStop">
-            <EntityTypeMapping TypeName="Database1Model.BusStop">
-              <MappingFragment StoreEntitySet="BusStop">
-                <ScalarProperty Name="BSID" ColumnName="BSID" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
-                <ScalarProperty Name="Address" ColumnName="Address" />
-                <ScalarProperty Name="Direction" ColumnName="Direction" />
-                <ScalarProperty Name="District" ColumnName="District" />
-                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="BusStopClass">
             <EntityTypeMapping TypeName="Database1Model.BusStopClass">
               <MappingFragment StoreEntitySet="BusStopClass">
@@ -781,6 +769,20 @@
                 <ScalarProperty Name="CreateTime" ColumnName="CreateTime" />
                 <ScalarProperty Name="UpdateTime" ColumnName="UpdateTime" />
                 <ScalarProperty Name="Schedule" ColumnName="Schedule" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BusStop">
+            <EntityTypeMapping TypeName="Database1Model.BusStop">
+              <MappingFragment StoreEntitySet="BusStop">
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="District" ColumnName="District" />
+                <ScalarProperty Name="Direction" ColumnName="Direction" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="BSCID" ColumnName="BSCID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="BSID" ColumnName="BSID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -19,7 +19,7 @@ namespace Finder
         public System.DateTime UpdateTime { get; set; }
         public string Status { get; set; }
     
-        public virtual BusStop BusStop { get; set; }
         public virtual User User { get; set; }
+        public virtual BusStop BusStop { get; set; }
     }
 }

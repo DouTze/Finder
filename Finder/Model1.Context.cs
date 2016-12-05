@@ -25,7 +25,6 @@ namespace Finder
             throw new UnintentionalCodeFirstException();
         }
     
-        public DbSet<BusStop> BusStop { get; set; }
         public DbSet<BusStopClass> BusStopClass { get; set; }
         public DbSet<BusStopUpdateList> BusStopUpdateList { get; set; }
         public DbSet<ElectricityBill> ElectricityBill { get; set; }
@@ -36,5 +35,6 @@ namespace Finder
         public DbSet<TaskModelDetail> TaskModelDetail { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<UserTask> UserTask { get; set; }
+        public DbSet<BusStop> BusStop { get; set; }
     }
 }
