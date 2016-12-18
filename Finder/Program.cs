@@ -16,7 +16,7 @@ namespace Finder
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new RecognizeForm());
+            Application.Run(new MainForm());
             
         }
     }

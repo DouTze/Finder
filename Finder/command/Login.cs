@@ -27,7 +27,7 @@ namespace Finder
             name = (string)args[2];
             email = (string)args[3];
             title = (string)args[4];
-            RecognizeForm form = (RecognizeForm)args[5];
+            MainForm form = (MainForm)args[5];
 
             form.UpdateText("Check if user already exist");
             User user = (from u in db.User where u.UID.Equals(account) select u).FirstOrDefault();
@@ -84,7 +84,7 @@ namespace Finder
             object[] args = (object[])obj;
             string account = (string)args[0];
             string pwd = (string)args[1];
-            RecognizeForm form = (RecognizeForm)args[2];
+            MainForm form = (MainForm)args[2];
 
             form.UpdateText("Now loading...");
             User user = (from u in db.User where u.UID.Equals(account) select u).FirstOrDefault();

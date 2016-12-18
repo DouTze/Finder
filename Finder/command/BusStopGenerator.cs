@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Finder.command
         {
             object[] args = (object[])obj;
             string path = (string)args[0];
-            RecognizeForm form = (RecognizeForm)args[1];
+            MainForm form = (MainForm)args[1];
 
             form.UpdateText("Getting data from database");
             List<BusStop> dbStop = (from s in db.BusStop select s).ToList();
@@ -101,5 +102,22 @@ namespace Finder.command
             form.UpdateLog("Incert finished");
         }
 
+        public static void ShowBusStop(object obj)
+        {
+            object[] args = (object[])obj;
+            MainForm form = (MainForm)args[0];
+
+            form.UpdateText("Loading database");
+            List<BusStop> bss = (from b in db.BusStop select b).ToList();
+            form.UpdateText("Print search result");
+            string msg = "BusStop List";
+            form.UpdateLog(msg);
+            foreach (BusStop bs in bss)
+            {
+                form.UpdateLogMessage(bs.BSID + ",\t" + bs.Name + ",\t" + bs.District + ",\t" + bs.Address + ",\t" + bs.Direction + ",\t" + bs.BSCID);
+
+            }
+            form.UpdateText("Finished");
+        }
     }
 }

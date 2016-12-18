@@ -18,7 +18,7 @@ namespace Finder
         public static void Run(object obj)
         {
             object[] objs = (object[])obj;
-            RecognizeForm form = (RecognizeForm)objs[0];
+            MainForm form = (MainForm)objs[0];
             String inp = (String)objs[1];
             String outp = (String)objs[2];
             try

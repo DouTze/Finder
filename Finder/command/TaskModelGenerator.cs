@@ -51,7 +51,7 @@ namespace Finder.command
         public static void ShowTaskClass(object obj)
         {
             object[] args = (object[])obj;
-            RecognizeForm form = (RecognizeForm)args[0];
+            MainForm form = (MainForm)args[0];
 
             List<TaskClass> tcs = (from t in db.TaskClass select t).ToList();
             string list = "";

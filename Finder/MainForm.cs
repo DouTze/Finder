@@ -13,7 +13,7 @@ using Finder.command;
 
 namespace Finder
 {
-    public partial class RecognizeForm : Form
+    public partial class MainForm : Form
     {
         delegate void UpdateMain();
         delegate void UpdateMainText(String text);
@@ -26,9 +26,13 @@ namespace Finder
         private bool login_p = false;
         private string userAccount = "";
         private string password = "";
+        private List<String> commandHistory = new List<string>();
+        private int historyIndex = 0;
         public User user;
+        private int curr_x, curr_y;
+        private bool isWndMove;
 
-        public RecognizeForm()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -43,14 +47,44 @@ namespace Finder
         private void ElectricityBill(string[] args)
         {
             textBox1.Text = "";
-
+            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
             Thread recogBill = new Thread(new ParameterizedThreadStart(ImageProcesser.RecognizeBill));
             recogBill.IsBackground = true;
-            recogBill.Start(new object[] { this, pictureBox1.Image, pictureBox2.Image });
+            string option = args[1];
+            try
+            {
+                switch (option)
+                {
+                    case "-example":
+                        recogBill.Start(new object[] { this, @"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\Finder\tess.png" });
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(recogBill);
+                        break;
+                    case "-input":
+                        recogBill.Start(new object[] { this, args[2] });
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(recogBill);
+                        break;
+                    case "-execute":
+                        Thread executeIP = new Thread(new ParameterizedThreadStart(ImageProcesser.Execute));
+                        executeIP.IsBackground = true;
+                        string[] cmd = new string[args.Length - 2];
+                        Array.Copy(args, 2, cmd, 0, cmd.Length);
+                        executeIP.Start(new object[] { this, cmd });
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(executeIP);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateLog(e.Message);
+                ReleaseCommand();
+            }
 
-            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
-            loadingAnime.IsBackground = true;
-            loadingAnime.Start(recogBill);
+
         }
 
         private void A2B(string[] args)
@@ -125,44 +159,47 @@ namespace Finder
         {
             textBox1.Text = "";
 
-            if (args.Length < 3)
+            string option = args[1];
+            try
             {
-                UpdateLog("Command \"bs\" need 2 args");
-            }
-            else
-            {
-                string option = args[1];
-                try
+                Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+                switch (option)
                 {
-                    Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
-                    switch (option)
-                    {
-                        case "-import":
-                            string[] filename = args[2].Split('.');
-                            if (!filename[filename.Length - 1].Equals("csv"))
-                            {
-                                loadingAnime = null;
-                                UpdateLog("Only support CSV file, please check file format and try again");
-                                ReleaseCommand();
-                                break;
-                            }
-                            textBox1.Text = "";
-                            Thread import = new Thread(new ParameterizedThreadStart(BusStopGenerator.ImportBusStop));
-                            import.IsBackground = true;
-                            import.Start(new object[] { args[2], this });
+                    case "-import":
+                        string[] filename = args[2].Split('.');
+                        if (!filename[filename.Length - 1].Equals("csv"))
+                        {
+                            loadingAnime = null;
+                            UpdateLog("Only support CSV file, please check file format and try again");
+                            ReleaseCommand();
+                            break;
+                        }
+                        textBox1.Text = "";
+                        Thread import = new Thread(new ParameterizedThreadStart(BusStopGenerator.ImportBusStop));
+                        import.IsBackground = true;
+                        import.Start(new object[] { args[2], this });
 
-                            loadingAnime.IsBackground = true;
-                            loadingAnime.Start(import);
-                            break;
-                        default:
-                            break;
-                    }
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(import);
+                        break;
+                    case "-ls":
+                        textBox1.Text = "";
+                        Thread list = new Thread(new ParameterizedThreadStart(BusStopGenerator.ShowBusStop));
+                        list.IsBackground = true;
+                        list.Start(new object[] { this });
+
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(list);
+                        break;
+                    default:
+                        break;
                 }
-                catch (Exception e)
-                {
-                    UpdateLog(e.Message);
-                    ReleaseCommand();
-                }
+            }
+            catch (Exception e)
+            {
+                UpdateLog(e.Message);
+                ReleaseCommand();
+
             }
         }
 
@@ -187,7 +224,7 @@ namespace Finder
                 string option = args[1];
                 try
                 {
-                    switch (option.Substring(0,2))
+                    switch (option.Substring(0, 2))
                     {
                         case "-r":
                             textBox1.Text = "";
@@ -217,7 +254,7 @@ namespace Finder
                     ReleaseCommand();
                 }
             }
-            
+
         }
 
         public void UpdateText(String text)
@@ -253,6 +290,20 @@ namespace Finder
             }
         }
 
+        public void UpdateLogMessage(String msg)
+        {
+            if (this.InvokeRequired)
+            {
+                UpdateMainText umt = new UpdateMainText(UpdateLogMessage);
+                this.Invoke(umt, new object[] { msg });
+            }
+            else
+            {
+                textBox2.AppendText(msg + "\n");
+                textBox2.Update();
+            }
+        }
+
         public void UpdateLabel(Label label, String content)
         {
             if (this.InvokeRequired)
@@ -278,6 +329,7 @@ namespace Finder
             }
             ReleaseCommand();
         }
+
 
         public void ReleaseCommand()
         {
@@ -348,7 +400,7 @@ namespace Finder
 
                     Thread li = new Thread(new ParameterizedThreadStart(Login.GetUser));
                     li.IsBackground = true;
-                    li.Start(new object[] { userAccount, password, this});
+                    li.Start(new object[] { userAccount, password, this });
 
                     Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
                     loadingAnime.IsBackground = true;
@@ -361,7 +413,27 @@ namespace Finder
                 else
                 {
                     textBox1.ReadOnly = true;
+                    commandHistory.Add(textBox1.Text);
+                    historyIndex = commandHistory.Count;
                     ExecuteCommand(textBox1.Text);
+                }
+            }
+            else if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Up)
+            {
+                if (historyIndex != 0)
+                {
+                    textBox1.Text = commandHistory[--historyIndex];
+                }
+            }
+            else if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Down)
+            {
+                if (historyIndex != commandHistory.Count - 1)
+                {
+                    textBox1.Text = commandHistory[++historyIndex];
+                }
+                else
+                {
+                    textBox1.Text = "";
                 }
             }
         }
@@ -414,6 +486,48 @@ namespace Finder
                     ReleaseCommand();
                     break;
             }
+        }
+
+        private void MainForm_Paint(object sender, PaintEventArgs e)
+        {
+            int width = this.Width - 1;
+            int height = this.Height - 1;
+            Pen greenPen = new Pen(Color.FromArgb(255, 0, 120, 0), 1);
+            e.Graphics.DrawRectangle(greenPen, 0, 0, width, height);
+        }
+
+        private void MainForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                this.curr_x = e.X;
+                this.curr_y = e.Y;
+                this.isWndMove = true;
+            }
+        }
+
+        private void MainForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.isWndMove)
+                this.Location = new Point(this.Left + e.X - this.curr_x, this.Top + e.Y - this.curr_y);
+        }
+
+        private void MainForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            this.isWndMove = false;
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+            int width = panel1.Width - 1;
+            int height = panel1.Height - 1;
+            Pen greenPen = new Pen(Color.FromArgb(255, 0, 120, 0), 1);
+            e.Graphics.DrawRectangle(greenPen, 0, 0, width, height);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
     }

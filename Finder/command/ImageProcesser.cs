@@ -10,6 +10,7 @@ using Emgu.CV.Util;
 using System.Drawing;
 using Tesseract;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Finder
 {
@@ -19,8 +20,10 @@ namespace Finder
         public static List<RotatedRect> boxList;
         public static int count = 0;
         public static List<Rectangle> rects = new List<Rectangle>();
-        static Bitmap ori_img, pro_img;
+        static Bitmap ori_img, pro_img, show_img;
         public static Bitmap[] targets = new Bitmap[3];
+        public delegate void ShowForm(MainForm parent, RecognizeForm rform);
+        public static RecognizeForm rform;
 
         public ImageProcesser(Bitmap ori, Bitmap pro)
         {
@@ -28,38 +31,159 @@ namespace Finder
             pro_img = pro;
         }
 
+        public static void ShowRecognizeForm(MainForm parent, RecognizeForm rform)
+        {
+            if (parent.InvokeRequired)
+            {
+                ShowForm sf = new ShowForm(ShowRecognizeForm);
+                parent.Invoke(sf, new object[] { parent, rform });
+            }
+            else
+            {
+                rform.Show(parent);
+            }
+        }
+
+        public static void Execute(object obj)
+        {
+            object[] objs = (object[])obj;
+
+            MainForm mform = (MainForm)objs[0];
+            // eb -execute {cmd [args]}
+            string[] cmd = (string[])objs[1];
+
+            if (rform == null)
+            {
+                rform = new RecognizeForm();
+                ShowRecognizeForm(mform, rform);
+            }
+
+            string errorMsg = "none";
+            switch (cmd[0])
+            {
+                case "showimg":
+                    for (int i = 0; i < cmd.Length; i++)
+                    {
+                        if (cmd[i].Equals("-input"))
+                        {
+                            ori_img = (Bitmap)Bitmap.FromFile(cmd[i + 1]);
+                            pro_img = (Bitmap)Bitmap.FromFile(cmd[i + 1]);
+                            break;
+                        }
+                    }
+                    if (ori_img == null)
+                    {
+                        errorMsg = "please enter the -input path";
+                    }
+                    else
+                    {
+                        show_img = ori_img;
+                        rform.UpdateImage(show_img);
+                    }
+                    break;
+                case "canny":
+                    if (ori_img == null)
+                    {
+                        errorMsg = "please run showimg command first";
+                    }
+                    else
+                    {
+                        Image<Gray, byte> cannyimg = new Image<Gray, byte>(show_img).Canny(Convert.ToDouble(cmd[1]), Convert.ToDouble(cmd[2]));
+                        show_img = cannyimg.Bitmap;
+                        rform.UpdateImage(show_img);
+                    }
+                    break;
+                case "houghlines":
+                    if (ori_img == null)
+                    {
+                        errorMsg = "please run showimg command first";
+                    }
+                    else
+                    {
+                        Image<Gray, byte> img = new Image<Gray, byte>(show_img);
+                        LineSegment2D[][] lines = img.HoughLines(
+                            Convert.ToDouble(cmd[1]),   // canny low threshold
+                            Convert.ToDouble(cmd[2]),   // canny high threshold
+                            1,                          // rho
+                            Math.PI/180.0,              // theta
+                            Convert.ToInt32(cmd[3]),    // threshold(cross point)
+                            Convert.ToDouble(cmd[4]),   // min lenght for line
+                            Convert.ToDouble(cmd[5])    // max allow gap between lines
+                            );
+                        foreach (LineSegment2D line in lines[0])
+                        {
+                            img.Draw(line, new Gray(0), 1);
+                        }
+                        show_img = img.Bitmap;
+                        rform.UpdateImage(show_img);
+                    }
+                    break;
+                case "refresh":
+                    if (ori_img == null)
+                    {
+                        errorMsg = "please run showimg command first";
+                    }
+                    else
+                    {
+                        show_img = ori_img;
+                        rform.UpdateImage(show_img);
+                    }
+                    break;
+                case "exit":
+                    rform.ExitForm();
+                    rform.Dispose();
+                    rform = null;
+                    break;
+                default:
+                    break;
+            }
+
+
+            if (errorMsg.Equals("none"))
+                mform.UpdateText("finished");
+            else
+                mform.UpdateLog(errorMsg);
+
+        }
+
         public static void RecognizeBill(object obj)
         {
             object[] objs = (object[])obj;
-            RecognizeForm reg = (RecognizeForm)objs[0];
-            ori_img = (Bitmap)objs[1];
-            pro_img = (Bitmap)objs[2];
-            reg.UpdateText("Clear Edges");
+            MainForm mform = (MainForm)objs[0];
+            ori_img = (Bitmap)Bitmap.FromFile((string)objs[1]);
+            pro_img = (Bitmap)Bitmap.FromFile((string)objs[1]);
+
+            RecognizeForm rform = new RecognizeForm();
+            ShowRecognizeForm(mform, rform);
+
+            mform.UpdateText("Clear Edges");
             EdgeFilter();
+            rform.UpdateImage(show_img);
 
-            reg.UpdateLog("Clear Edges");
-            reg.UpdateText("Execute Sobel Filter");
+            mform.UpdateLog("Clear Edges");
+            mform.UpdateText("Execute Sobel Filter");
             SobelFilter();
+            rform.UpdateImage(show_img);
 
-            reg.UpdateLog("Execute Sobel Filter");
-            reg.UpdateText("Find target Rectangles");
+            mform.UpdateLog("Execute Sobel Filter");
+            mform.UpdateText("Find target Rectangles");
             FindRectangle();
+            rform.UpdateImage(show_img);
 
-            reg.UpdateLog("Find target Rectangles");
-            reg.UpdateText("Cut image");
+            mform.UpdateLog("Find target Rectangles");
+            mform.UpdateText("Cut image");
             CutImage();
 
-            reg.UpdateLog("Cut image");
-            reg.UpdateText("Recognize address");
+            mform.UpdateLog("Cut image");
+            mform.UpdateText("Recognize address");
             TesseractEngine ocr = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "chi_tra+eng", EngineMode.Default);
             Pix img = PixConverter.ToPix(targets[1]);
             Page addpage = ocr.Process(img);
-            string[] address = addpage.GetText().Trim().Split(new char[] { '：', ':', '︰' });
-            string addr = address[1].Trim().Replace(" ", String.Empty);
+            string address = addpage.GetText().Trim().Replace(" ", String.Empty);
             ocr.Dispose();
 
-            reg.UpdateLog("Recognize address");
-            reg.UpdateText("Recognize eid, date, price");
+            mform.UpdateLog("Recognize address");
+            mform.UpdateText("Recognize eid, date, price");
             Pix idpimg = PixConverter.ToPix(targets[2]);
             TesseractEngine ocre = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "eng", EngineMode.Default);
             Page idppage = ocre.Process(idpimg);
@@ -82,8 +206,8 @@ namespace Finder
             string date = idpdata[tar + 1];
             string price = idpdata[tar + 2].Replace("*", String.Empty);
 
-            reg.UpdateLog("Recognize eid, date, price\n");
-            reg.UpdateText("Recognize kWh");
+            mform.UpdateLog("Recognize eid, date, price\n");
+            mform.UpdateText("Recognize kWh");
             Pix kwhimg = PixConverter.ToPix(targets[0]);
             ocre = new TesseractEngine(@"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\packages\Tesseract.3.0.2.0\tessdata", "eng", EngineMode.Default);
             Page kwhpage = ocre.Process(kwhimg);
@@ -101,10 +225,10 @@ namespace Finder
             }
             ocre.Dispose();
 
-            reg.UpdateLog("Recognize kWh");
-            reg.UpdateLog("Result [ "+eid+" , "+date+" , "+price+" , "+kwh+" , "+addr+" ]");
-            reg.UpdateText("Finished");
-            reg.UpdateLog("Finished");
+            mform.UpdateLog("Recognize kWh");
+            mform.UpdateLog("Result [ " + eid + " , " + date + " , " + price + " , " + kwh + " , " + address + " ]");
+            mform.UpdateText("Finished");
+            mform.UpdateLog("Finished");
         }
 
         private static void FindRectangle()
@@ -194,9 +318,9 @@ namespace Finder
             #endregion
             #region draw rectangles
 
-            //foreach (RotatedRect box in boxList)
-            //img.Draw(box, new Rgb(Color.DarkOrange), 2);
-            pro_img = img.Bitmap;
+            foreach (RotatedRect box in boxList)
+                img.Draw(box, new Rgb(Color.DarkOrange), 2);
+            show_img = img.Bitmap;
             //img.Save("rect_" + this.count + ".png");
             #endregion
         }
@@ -240,13 +364,14 @@ namespace Finder
                 }
 
             }
-            img.Save("edge_" + count + ".png");
-            ori_img = img.Bitmap;
+            //img.Save("edge_" + count + ".png");
+            //ori_img = img.Bitmap;
+            show_img = img.Bitmap;
         }
 
         private static void SobelFilter()
         {
-            Image<Gray, Byte> img = new Image<Gray, byte>(ori_img);
+            Image<Gray, Byte> img = new Image<Gray, byte>(show_img);
             Image<Gray, float> shimg = img.Sobel(1, 0, 3);
             Image<Gray, float> svimg = img.Sobel(0, 1, 3);
 
@@ -266,13 +391,13 @@ namespace Finder
             sobelEdges = new UMat();
             CvInvoke.Threshold(sobelImage, sobelEdges, 70, 255, ThresholdType.Binary);
             //sobelEdges.Save("sobel_" + count + ".png");
-            //pictureBox1.Image = sobelImage.Bitmap;
+            show_img = sobelImage.Bitmap;
         }
 
         private static void CutImage()
         {
             #region 影像裁切
-            Image img = ori_img as Image;
+            Image img = show_img as Image;
             //設定裁切範圍
             foreach (Rectangle rect in rects)
             {
