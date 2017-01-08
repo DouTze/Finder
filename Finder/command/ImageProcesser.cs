@@ -11,6 +11,7 @@ using System.Drawing;
 using Tesseract;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.IO;
 
 namespace Finder
 {
@@ -20,15 +21,14 @@ namespace Finder
         public static List<RotatedRect> boxList;
         public static int count = 0;
         public static List<Rectangle> rects = new List<Rectangle>();
-        static Bitmap ori_img, pro_img, show_img;
+        static Bitmap ori_img, pre_img, show_img;
         public static Bitmap[] targets = new Bitmap[3];
         public delegate void ShowForm(MainForm parent, RecognizeForm rform);
         public static RecognizeForm rform;
 
-        public ImageProcesser(Bitmap ori, Bitmap pro)
+        public ImageProcesser(Bitmap ori)
         {
             ori_img = ori;
-            pro_img = pro;
         }
 
         public static void ShowRecognizeForm(MainForm parent, RecognizeForm rform)
@@ -59,83 +59,179 @@ namespace Finder
             }
 
             string errorMsg = "none";
-            switch (cmd[0])
+            try
             {
-                case "showimg":
-                    for (int i = 0; i < cmd.Length; i++)
-                    {
-                        if (cmd[i].Equals("-input"))
+                switch (cmd[0])
+                {
+                    case "showimg":
+                        for (int i = 0; i < cmd.Length; i++)
                         {
-                            ori_img = (Bitmap)Bitmap.FromFile(cmd[i + 1]);
-                            pro_img = (Bitmap)Bitmap.FromFile(cmd[i + 1]);
-                            break;
+                            if (cmd[i].Equals("-input"))
+                            {
+                                ori_img = (Bitmap)Bitmap.FromFile(cmd[i + 1]);
+                                break;
+                            }
                         }
-                    }
-                    if (ori_img == null)
-                    {
-                        errorMsg = "please enter the -input path";
-                    }
-                    else
-                    {
-                        show_img = ori_img;
-                        rform.UpdateImage(show_img);
-                    }
-                    break;
-                case "canny":
-                    if (ori_img == null)
-                    {
-                        errorMsg = "please run showimg command first";
-                    }
-                    else
-                    {
-                        Image<Gray, byte> cannyimg = new Image<Gray, byte>(show_img).Canny(Convert.ToDouble(cmd[1]), Convert.ToDouble(cmd[2]));
-                        show_img = cannyimg.Bitmap;
-                        rform.UpdateImage(show_img);
-                    }
-                    break;
-                case "houghlines":
-                    if (ori_img == null)
-                    {
-                        errorMsg = "please run showimg command first";
-                    }
-                    else
-                    {
-                        Image<Gray, byte> img = new Image<Gray, byte>(show_img);
-                        LineSegment2D[][] lines = img.HoughLines(
-                            Convert.ToDouble(cmd[1]),   // canny low threshold
-                            Convert.ToDouble(cmd[2]),   // canny high threshold
-                            1,                          // rho
-                            Math.PI/180.0,              // theta
-                            Convert.ToInt32(cmd[3]),    // threshold(cross point)
-                            Convert.ToDouble(cmd[4]),   // min lenght for line
-                            Convert.ToDouble(cmd[5])    // max allow gap between lines
-                            );
-                        foreach (LineSegment2D line in lines[0])
+                        if (ori_img == null)
                         {
-                            img.Draw(line, new Gray(0), 1);
+                            errorMsg = "please enter the -input path";
                         }
-                        show_img = img.Bitmap;
+                        else
+                        {
+                            show_img = ori_img;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "back":
+                        Bitmap tmp = show_img;
+                        show_img = pre_img;
+                        pre_img = tmp;
                         rform.UpdateImage(show_img);
-                    }
-                    break;
-                case "refresh":
-                    if (ori_img == null)
-                    {
-                        errorMsg = "please run showimg command first";
-                    }
-                    else
-                    {
-                        show_img = ori_img;
+                        break;
+                    case "avggray":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            Image<Gray, byte> grayimg = new Image<Gray, byte>(show_img);
+                            grayimg._ThresholdBinary(grayimg.GetAverage(), new Gray(255));
+                            pre_img = show_img;
+                            show_img = grayimg.Bitmap;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "erode":
+                        Image<Gray, byte> eimg = new Image<Gray, byte>(show_img);
+                        Size kSize = new System.Drawing.Size(Convert.ToInt32(cmd[1]), Convert.ToInt32(cmd[2]));
+                        Point anchor = new Point(Convert.ToInt32(cmd[3]), Convert.ToInt32(cmd[4]));
+                        ElementShape shape = ElementShape.Rectangle;
+                        switch(cmd[5]){
+                            case "ellipse":
+                                shape = ElementShape.Ellipse;
+                                break;
+                            case "rectangle":
+                                shape = ElementShape.Rectangle;
+                                break;
+                            case "cross":
+                                shape = ElementShape.Cross;
+                                break;
+                        }
+                        Mat element = CvInvoke.GetStructuringElement(shape, kSize, anchor);
+                        Mat dstImg = new Mat();
+                        CvInvoke.Erode(eimg, dstImg, element, anchor, Convert.ToInt32(cmd[6]), BorderType.Default, new MCvScalar(0, 0, 0));
+                        pre_img = show_img;
+                        show_img = dstImg.Bitmap;
                         rform.UpdateImage(show_img);
-                    }
-                    break;
-                case "exit":
-                    rform.ExitForm();
-                    rform.Dispose();
-                    rform = null;
-                    break;
-                default:
-                    break;
+                        break;
+                    case "dilate":
+                        Image<Gray, byte> dimg = new Image<Gray, byte>(show_img);
+                        Size dSize = new System.Drawing.Size(Convert.ToInt32(cmd[1]), Convert.ToInt32(cmd[2]));
+                        Point danchor = new Point(Convert.ToInt32(cmd[3]), Convert.ToInt32(cmd[4]));
+                        ElementShape dshape = ElementShape.Rectangle;
+                        switch(cmd[5]){
+                            case "ellipse":
+                                dshape = ElementShape.Ellipse;
+                                break;
+                            case "rectangle":
+                                dshape = ElementShape.Rectangle;
+                                break;
+                            case "cross":
+                                dshape = ElementShape.Cross;
+                                break;
+                        }
+                        Mat delement = CvInvoke.GetStructuringElement(dshape, dSize, danchor);
+                        Mat ddstImg = new Mat();
+                        CvInvoke.Dilate(dimg, ddstImg, delement, danchor, Convert.ToInt32(cmd[6]), BorderType.Default, new MCvScalar(0, 0, 0));
+                        pre_img = show_img;
+                        show_img = ddstImg.Bitmap;
+                        rform.UpdateImage(show_img);
+                        break;
+                    case "canny":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            Image<Gray, byte> cannyimg = new Image<Gray, byte>(show_img).Canny(Convert.ToDouble(cmd[1]), Convert.ToDouble(cmd[2]));
+                            pre_img = show_img;
+                            show_img = cannyimg.Bitmap;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "houghlines":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            Image<Gray, byte> img = new Image<Gray, byte>(show_img);
+                            LineSegment2D[][] lines = img.HoughLines(
+                                Convert.ToDouble(cmd[1]),   // canny low threshold
+                                Convert.ToDouble(cmd[2]),   // canny high threshold
+                                1,                          // rho
+                                Math.PI / 180.0,            // theta
+                                Convert.ToInt32(cmd[3]),    // threshold(cross point)
+                                Convert.ToDouble(cmd[4]),   // min lenght for line
+                                Convert.ToDouble(cmd[5])    // max allow gap between lines
+                                );
+                            foreach (LineSegment2D line in lines[0])
+                            {
+                                img.Draw(line, new Gray(0), 1);
+                            }
+                            pre_img = show_img;
+                            show_img = img.Bitmap;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "refresh":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            pre_img = show_img;
+                            show_img = ori_img;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "exit":
+                        rform.ExitForm();
+                        rform.Dispose();
+                        rform = null;
+                        break;
+                    case "help":
+                        StreamReader input = new StreamReader(@"document.txt");
+                        string doc;
+                        bool tag = false;
+                        while (!input.EndOfStream)
+                        {
+                            doc = input.ReadLine();
+                            if (doc.Equals("<img>"))
+                            {
+                                tag = true;
+                                continue;
+                            }
+                            else if(doc.Equals("</img>"))
+                            {
+                                break;
+                            }
+                            if (tag) mform.UpdateLog(doc);
+                        }
+                        input.Close();
+                        input.Dispose();
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                mform.UpdateLog(e.Message);
             }
 
 
@@ -151,7 +247,6 @@ namespace Finder
             object[] objs = (object[])obj;
             MainForm mform = (MainForm)objs[0];
             ori_img = (Bitmap)Bitmap.FromFile((string)objs[1]);
-            pro_img = (Bitmap)Bitmap.FromFile((string)objs[1]);
 
             RecognizeForm rform = new RecognizeForm();
             ShowRecognizeForm(mform, rform);

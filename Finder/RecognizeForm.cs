@@ -15,10 +15,14 @@ namespace Finder
         delegate void UpdateRecognizeImage(Bitmap bm);
         delegate void Exit();
         private int curr_x, curr_y;
-        private bool isWndMove;
+        private int ori_w, ori_h;
+        private bool isWndMove, isPicMin;
+
         public RecognizeForm()
         {
             InitializeComponent();
+            ori_w = pictureBox1.Width;
+            ori_h = pictureBox1.Height;
         }
 
         private void RecognizeForm_Load(object sender, EventArgs e)
@@ -28,7 +32,7 @@ namespace Finder
 
         public void UpdateImage(Bitmap bm)
         {
-            
+
             if (this.InvokeRequired)
             {
                 UpdateRecognizeImage uml = new UpdateRecognizeImage(UpdateImage);
@@ -92,5 +96,49 @@ namespace Finder
         {
             this.isWndMove = false;
         }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            double scale = 1;
+            if (pictureBox1.Height > 0)
+            {
+                scale = (double)pictureBox1.Width / (double)pictureBox1.Height;
+            }
+            if (!(pictureBox1.Height > 459))
+            {
+                isPicMin = true;
+            }
+            if (!(isPicMin && e.Delta < 0))
+            {
+
+                pictureBox1.Width += (int)((e.Delta / 5) * scale);
+                pictureBox1.Height += (e.Delta / 5);
+
+                isPicMin = false;
+            }
+        }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+        }
+
+        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void RecognizeForm_MouseEnter(object sender, EventArgs e)
+        {
+            pictureBox1.Focus();
+        }
+
     }
 }

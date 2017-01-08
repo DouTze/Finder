@@ -55,7 +55,7 @@ namespace Finder
             {
                 switch (option)
                 {
-                    case "-example":
+                    case "-e":
                         recogBill.Start(new object[] { this, @"C:\Users\Allen Chou\Documents\Visual Studio 2013\Projects\Finder\Finder\tess.png" });
                         loadingAnime.IsBackground = true;
                         loadingAnime.Start(recogBill);
@@ -65,7 +65,7 @@ namespace Finder
                         loadingAnime.IsBackground = true;
                         loadingAnime.Start(recogBill);
                         break;
-                    case "-execute":
+                    case "-p":
                         Thread executeIP = new Thread(new ParameterizedThreadStart(ImageProcesser.Execute));
                         executeIP.IsBackground = true;
                         string[] cmd = new string[args.Length - 2];
@@ -85,6 +85,33 @@ namespace Finder
             }
 
 
+        }
+
+        private void Mail(string[] args)
+        {
+            textBox1.Text = "";
+            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+            Thread mail = new Thread(new ParameterizedThreadStart(Email.GetContact));
+            mail.IsBackground = true;
+            string option = args[1];
+            try
+            {
+                switch (option)
+                {
+                    case "-ls":
+                        mail.Start(new object[] { this });
+                        loadingAnime.IsBackground = true;
+                        loadingAnime.Start(mail);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateLog(e.Message);
+                ReleaseCommand();
+            }
         }
 
         private void A2B(string[] args)
@@ -418,32 +445,15 @@ namespace Finder
                     ExecuteCommand(textBox1.Text);
                 }
             }
-            else if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Up)
-            {
-                if (historyIndex != 0)
-                {
-                    textBox1.Text = commandHistory[--historyIndex];
-                }
-            }
-            else if ((Keys)Enum.Parse(typeof(Keys), ((int)e.KeyChar).ToString()) == Keys.Down)
-            {
-                if (historyIndex != commandHistory.Count - 1)
-                {
-                    textBox1.Text = commandHistory[++historyIndex];
-                }
-                else
-                {
-                    textBox1.Text = "";
-                }
-            }
         }
+
 
         private void ExecuteCommand(String command)
         {
             String[] comopt = command.Trim().Split(' ');
             switch (comopt[0])
             {
-                case "eb":
+                case "img":
                     UpdateLog(command);
                     ElectricityBill(comopt);
                     break;
@@ -454,6 +464,10 @@ namespace Finder
                 case "login":
                     UpdateLog(command);
                     RunLogin(comopt);
+                    break;
+                case "mail":
+                    UpdateLog(command);
+                    Mail(comopt);
                     break;
                 case "mktm":
                     UpdateLog(command);
@@ -528,6 +542,30 @@ namespace Finder
         private void button2_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void textBox1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            switch (e.KeyValue)
+            {
+                case 38:
+                    if (historyIndex != 0)
+                    {
+                        textBox1.Text = commandHistory[--historyIndex];
+                    }
+                    break;
+                case 40:
+                    if (historyIndex < commandHistory.Count - 1 && commandHistory.Count != 0)
+                    {
+                        textBox1.Text = commandHistory[++historyIndex];
+                    }
+                    else
+                    {
+                        textBox1.Text = "";
+                        historyIndex = commandHistory.Count;
+                    }
+                    break;
+            }
         }
 
     }

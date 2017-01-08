@@ -68,6 +68,9 @@
       <HintPath>..\packages\gmaps-api-net.0.13.30\lib\net\Google.Maps.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\gmaps-api-net.0.13.30\lib\net\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -103,6 +106,7 @@
     </Compile>
     <Compile Include="command\Address2Block.cs" />
     <Compile Include="command\BusStopGenerator.cs" />
+    <Compile Include="command\Email.cs" />
     <Compile Include="command\Login.cs" />
     <Compile Include="command\TaskModelGenerator.cs" />
     <Compile Include="ElectricityBill.cs">
