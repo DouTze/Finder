@@ -75,7 +75,8 @@ namespace Finder
                         loadingAnime.Start(executeIP);
                         break;
                     default:
-                        break;
+                        Exception e = new Exception("Unknown command "+option);
+                        throw e;
                 }
             }
             catch (Exception e)
@@ -132,6 +133,28 @@ namespace Finder
                 loadingAnime.IsBackground = true;
                 loadingAnime.Start(a2b);
             }
+        }
+
+        private void Kiss(string[] args)
+        {
+            textBox1.Text = "";
+            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+            Thread kiss = new Thread(new ParameterizedThreadStart(AutoKiss.Kiss));
+            kiss.IsBackground = true;
+            if (args.Length > 1)
+            {
+                string userid = args[1];
+                string pwd = args[2];
+                kiss.Start(new object[] { userid, pwd, this });
+            }
+            else
+            {
+                kiss = new Thread(new ParameterizedThreadStart(AutoKiss.KissMe));
+                kiss.IsBackground = true;
+                kiss.Start(new object[] { this });
+            }
+            loadingAnime.IsBackground = true;
+            loadingAnime.Start(kiss);
         }
 
         private void MakeTaskModel(string[] args)
@@ -464,6 +487,10 @@ namespace Finder
                 case "login":
                     UpdateLog(command);
                     RunLogin(comopt);
+                    break;
+                case "kiss":
+                    UpdateLog(command);
+                    Kiss(comopt);
                     break;
                 case "mail":
                     UpdateLog(command);

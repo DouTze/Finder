@@ -25,6 +25,8 @@ namespace Finder
         public static Bitmap[] targets = new Bitmap[3];
         public delegate void ShowForm(MainForm parent, RecognizeForm rform);
         public static RecognizeForm rform;
+        public static int savet = 0;
+        private static Matrix<byte> _Cross, _Diamond, _Square, _XSharp;
 
         public ImageProcesser(Bitmap ori)
         {
@@ -102,12 +104,36 @@ namespace Finder
                             rform.UpdateImage(show_img);
                         }
                         break;
+                    case "sobel":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            SobelFilter();
+                        }
+                        break;
+                    case "median":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            Image<Bgr, byte> img = new Image<Bgr, byte>(show_img).SmoothMedian(3);
+                            pre_img = show_img;
+                            show_img = img.Bitmap;
+                            rform.UpdateImage(show_img);
+                        }
+                        break;
                     case "erode":
                         Image<Gray, byte> eimg = new Image<Gray, byte>(show_img);
                         Size kSize = new System.Drawing.Size(Convert.ToInt32(cmd[1]), Convert.ToInt32(cmd[2]));
                         Point anchor = new Point(Convert.ToInt32(cmd[3]), Convert.ToInt32(cmd[4]));
                         ElementShape shape = ElementShape.Rectangle;
-                        switch(cmd[5]){
+                        switch (cmd[5])
+                        {
                             case "ellipse":
                                 shape = ElementShape.Ellipse;
                                 break;
@@ -130,7 +156,8 @@ namespace Finder
                         Size dSize = new System.Drawing.Size(Convert.ToInt32(cmd[1]), Convert.ToInt32(cmd[2]));
                         Point danchor = new Point(Convert.ToInt32(cmd[3]), Convert.ToInt32(cmd[4]));
                         ElementShape dshape = ElementShape.Rectangle;
-                        switch(cmd[5]){
+                        switch (cmd[5])
+                        {
                             case "ellipse":
                                 dshape = ElementShape.Ellipse;
                                 break;
@@ -148,6 +175,9 @@ namespace Finder
                         show_img = ddstImg.Bitmap;
                         rform.UpdateImage(show_img);
                         break;
+                    case "clearedge":
+                        EdgeFilter();
+                        break;
                     case "canny":
                         if (ori_img == null)
                         {
@@ -159,6 +189,26 @@ namespace Finder
                             pre_img = show_img;
                             show_img = cannyimg.Bitmap;
                             rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "corners":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            GetCorners();
+                        }
+                        break;
+                    case "findrec":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            FindRectangle(Convert.ToInt32(cmd[1]), Convert.ToInt32(cmd[2]));
                         }
                         break;
                     case "houghlines":
@@ -187,6 +237,16 @@ namespace Finder
                             rform.UpdateImage(show_img);
                         }
                         break;
+                    case "iterrec":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            DrawAllRectangles();
+                        }
+                        break;
                     case "refresh":
                         if (ori_img == null)
                         {
@@ -197,6 +257,16 @@ namespace Finder
                             pre_img = show_img;
                             show_img = ori_img;
                             rform.UpdateImage(show_img);
+                        }
+                        break;
+                    case "saveimg":
+                        if (ori_img == null)
+                        {
+                            errorMsg = "please run showimg command first";
+                        }
+                        else
+                        {
+                            show_img.Save("save_img_" + savet++ + ".png");
                         }
                         break;
                     case "exit":
@@ -216,7 +286,7 @@ namespace Finder
                                 tag = true;
                                 continue;
                             }
-                            else if(doc.Equals("</img>"))
+                            else if (doc.Equals("</img>"))
                             {
                                 break;
                             }
@@ -262,7 +332,7 @@ namespace Finder
 
             mform.UpdateLog("Execute Sobel Filter");
             mform.UpdateText("Find target Rectangles");
-            FindRectangle();
+            FindRectangle(10, 20);
             rform.UpdateImage(show_img);
 
             mform.UpdateLog("Find target Rectangles");
@@ -326,16 +396,17 @@ namespace Finder
             mform.UpdateLog("Finished");
         }
 
-        private static void FindRectangle()
+        private static void FindRectangle(int min, int max)
         {
             Image<Rgb, Byte> img = new Image<Rgb, byte>(ori_img);
+            Image<Gray, Byte> edgeImage = new Image<Gray, byte>(show_img);
             #region Find rectangles
             boxList = new List<RotatedRect>(); //a box is a rotated rectangle
             double rate = img.Width * img.Height / 3864714.0;
             bool isIDPExist = false, isUseExist = false, isAddressExist = false;
             using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
             {
-                CvInvoke.FindContours(sobelEdges, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
+                CvInvoke.FindContours(edgeImage, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
                 int count = contours.Size;
                 for (int i = 0; i < count; i++)
                 {
@@ -407,6 +478,16 @@ namespace Finder
                                 isAddressExist = true;
                             }
                         }
+                        else if (area > min * rate && area < max * rate)
+                        {
+                            Point[] pts = contour.ToArray();
+                            PointF[] ptfs = new PointF[pts.Length];
+                            for (int pi = 0; pi < pts.Length; pi++)
+                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+                            Rectangle rec = PointCollection.BoundingRectangle(ptfs);
+                            img.Draw(rec, new Rgb(Color.DarkOrange), 2);
+                            rects.Add(rec);
+                        }
                     }
                 }
             }
@@ -415,10 +496,63 @@ namespace Finder
 
             foreach (RotatedRect box in boxList)
                 img.Draw(box, new Rgb(Color.DarkOrange), 2);
+            pre_img = show_img;
             show_img = img.Bitmap;
+            rform.UpdateImage(show_img);
             //img.Save("rect_" + this.count + ".png");
             #endregion
         }
+
+        private static void DrawAllRectangles()
+        {
+
+            Image<Gray, Byte> edgeImage = new Image<Gray, byte>(show_img);
+            #region Find rectangles
+            boxList = new List<RotatedRect>(); //a box is a rotated rectangle
+            using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+            {
+                CvInvoke.FindContours(edgeImage, contours, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
+
+                for (int i = 0; i < contours.Size; i++)
+                {
+                    Image<Rgb, Byte> img = new Image<Rgb, byte>(ori_img);
+                    double rate = img.Width * img.Height / 3864714.0;
+
+                    using (VectorOfPoint contour = contours[i])
+                    using (VectorOfPoint approxContour = new VectorOfPoint())
+                    {
+                        CvInvoke.ApproxPolyDP(contour, approxContour, CvInvoke.ArcLength(contour, true) * 0.05, true);
+                        double area = CvInvoke.ContourArea(contour, false);
+
+                        if (area > 40000)
+                        {
+                            Point[] pts = contour.ToArray();
+                            PointF[] ptfs = new PointF[pts.Length];
+                            for (int pi = 0; pi < pts.Length; pi++)
+                                ptfs[pi] = new PointF(pts[pi].X, pts[pi].Y);
+
+                            Rectangle rec = PointCollection.BoundingRectangle(ptfs);
+                            img.Draw(rec, new Rgb(Color.DarkOrange), 2);
+
+                            // Create string to draw.
+                            String drawString = "Area : " + area;
+
+                            // Draw string to image.
+                            img.Draw(drawString, rec.Location, FontFace.HersheyTriplex, 1, new Rgb(Color.Black), 2);
+
+                            #region draw rectangle
+                            pre_img = show_img;
+                            show_img = img.Bitmap;
+                            rform.UpdateImage(show_img);
+                            img.Save("rect_" + i + ".png");
+                            #endregion
+                        }
+                    }
+                }
+            }
+            #endregion
+        }
+
 
         private static void EdgeFilter()
         {
@@ -441,7 +575,7 @@ namespace Finder
                             && npixel[point + 1] > avg - 15 && npixel[point + 1] < avg + 15
                             && npixel[point + 2] > avg - 15 && npixel[point + 2] < avg + 15)
                         {
-                            if (avg < 200)
+                            if (avg < 230)
                             {
                                 npixel[point] = 0;
                                 npixel[point + 1] = 0;
@@ -461,7 +595,9 @@ namespace Finder
             }
             //img.Save("edge_" + count + ".png");
             //ori_img = img.Bitmap;
+            pre_img = show_img;
             show_img = img.Bitmap;
+            rform.UpdateImage(show_img);
         }
 
         private static void SobelFilter()
@@ -486,7 +622,73 @@ namespace Finder
             sobelEdges = new UMat();
             CvInvoke.Threshold(sobelImage, sobelEdges, 70, 255, ThresholdType.Binary);
             //sobelEdges.Save("sobel_" + count + ".png");
+            pre_img = show_img;
             show_img = sobelImage.Bitmap;
+            rform.UpdateImage(show_img);
+        }
+
+        public static void GetCorners()
+        {
+            byte[,] cross = new byte[5, 5] { 
+            {0,0,1,0,0},
+            {0,0,1,0,0},
+            {1,1,1,1,1},
+            {0,0,1,0,0},
+            {0,0,1,0,0}};
+            _Cross = new Matrix<byte>(cross); 
+            
+            byte[,] diamond = new byte[5, 5] { 
+            {0,0,1,0,0},
+            {0,1,1,1,0},
+            {1,1,1,1,1},
+            {0,1,1,1,0},
+            {0,0,1,0,0}};
+            _Diamond = new Matrix<byte>(diamond);
+
+            byte[,] square = new byte[5, 5] { 
+            {0,0,0,0,0},
+            {0,1,1,1,0},
+            {0,1,1,1,0},
+            {0,1,1,1,0},
+            {0,0,0,0,0}};
+            _Square = new Matrix<byte>(square);
+
+            byte[,] xshape = new byte[5, 5] { 
+            {1,0,0,0,1},
+            {0,1,0,1,0},
+            {0,0,1,0,0},
+            {0,1,0,1,0},
+            {1,0,0,0,1}};
+            _XSharp = new Matrix<byte>(xshape);
+
+            Image<Gray, byte> simg = new Image<Gray, byte>(show_img);
+
+            Image<Gray, byte> dimg = new Image<Gray, byte>(show_img);
+            CvInvoke.Dilate(dimg, dimg, _Cross, new Point(0, 0), 1, BorderType.Default, new MCvScalar(0, 0, 0));
+            CvInvoke.Erode(dimg, dimg, _Diamond, new Point(0, 0), 1, BorderType.Default, new MCvScalar(0, 0, 0));
+
+            Image<Gray, byte> dimg2 = new Image<Gray, byte>(show_img);
+            CvInvoke.Dilate(dimg2, dimg2, _XSharp, new Point(0, 0), 1, BorderType.Default, new MCvScalar(0, 0, 0));
+            CvInvoke.Erode(dimg2, dimg2, CvInvoke.GetStructuringElement(ElementShape.Rectangle, new Size(5, 5), new Point(2, 2)), new Point(0, 0), 1, BorderType.Default, new MCvScalar(0, 0, 0));
+
+            dimg = dimg.AbsDiff(dimg2);
+            dimg._ThresholdBinary(new Gray(10), new Gray(255));
+
+            for (int h = 0; h < dimg.Height; h++)
+            {
+                for (int w = 0; w < dimg.Width; w++)
+                {
+                    if (dimg[h, w].Intensity != 0)
+                    {
+                        CircleF circle = new CircleF(new PointF(w, h), 5);
+                        simg.Draw(circle, new Gray(0), 1);
+                    }
+                }
+            }
+
+            pre_img = show_img;
+            show_img = simg.Bitmap;
+            rform.UpdateImage(show_img);
         }
 
         private static void CutImage()
