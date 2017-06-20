@@ -157,6 +157,34 @@ namespace Finder
             loadingAnime.Start(kiss);
         }
 
+        private void OMS(string[] args)
+        {
+            textBox1.Text = "";
+            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+            Thread oms = new Thread(new ParameterizedThreadStart(OMSQuery.Execute));
+            oms.IsBackground = true;
+            string[] cmd = new string[args.Length - 1];
+            Array.Copy(args, 1, cmd, 0, cmd.Length);
+            oms.Start(new object[] { this, cmd });
+
+            loadingAnime.IsBackground = true;
+            loadingAnime.Start(oms);
+        }
+
+        private void ADP(string[] args)
+        {
+            textBox1.Text = "";
+            Thread loadingAnime = new Thread(new ParameterizedThreadStart(UpdateLoadingIcon));
+            Thread adp = new Thread(new ParameterizedThreadStart(ADPAccess.QueryHistory));
+            adp.IsBackground = true;
+            string[] cmd = new string[args.Length - 1];
+            Array.Copy(args, 1, cmd, 0, cmd.Length);
+            adp.Start(new object[] { this, cmd });
+
+            loadingAnime.IsBackground = true;
+            loadingAnime.Start(adp);
+        }
+
         private void MakeTaskModel(string[] args)
         {
             textBox1.Text = "";
@@ -483,6 +511,14 @@ namespace Finder
                 case "a2b":
                     UpdateLog(command);
                     A2B(comopt);
+                    break;
+                case "oms":
+                    UpdateLog(command);
+                    OMS(comopt);
+                    break;
+                case "adp":
+                    UpdateLog(command);
+                    ADP(comopt);
                     break;
                 case "login":
                     UpdateLog(command);

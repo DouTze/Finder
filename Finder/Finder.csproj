@@ -72,6 +72,9 @@
       <HintPath>..\packages\HtmlAgilityPack.1.4.9.5\lib\Net45\HtmlAgilityPack.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Outlook, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
@@ -85,6 +88,7 @@
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -109,10 +113,13 @@
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
     <Compile Include="command\Address2Block.cs" />
+    <Compile Include="command\ADPAccess.cs" />
     <Compile Include="command\AutoKiss.cs" />
     <Compile Include="command\BusStopGenerator.cs" />
     <Compile Include="command\Email.cs" />
     <Compile Include="command\Login.cs" />
+    <Compile Include="command\MiniHttpServer.cs" />
+    <Compile Include="command\OMSQuery.cs" />
     <Compile Include="command\TaskModelGenerator.cs" />
     <Compile Include="ElectricityBill.cs">
       <DependentUpon>Model1.tt</DependentUpon>

@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="069bba7e50bf4f778a33dc9a40d683ab" Name="Diagram1">
+      <Diagram DiagramId="069bba7e50bf4f778a33dc9a40d683ab" Name="Diagram1" ZoomLevel="62">
         <EntityTypeShape EntityType="Database1Model.BusStopClass" Width="1.5" PointX="7.5" PointY="9.875" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.BusStopUpdateList" Width="1.5" PointX="3.125" PointY="9.625" IsExpanded="true" />
         <EntityTypeShape EntityType="Database1Model.ElectricityBill" Width="1.5" PointX="5.375" PointY="5.5" IsExpanded="true" />

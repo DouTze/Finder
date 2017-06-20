@@ -198,7 +198,8 @@ namespace Finder
                         }
                         else
                         {
-                            GetCorners();
+                            GetCornersByHarris();
+                            //GetCorners();
                         }
                         break;
                     case "findrec":
@@ -575,7 +576,7 @@ namespace Finder
                             && npixel[point + 1] > avg - 15 && npixel[point + 1] < avg + 15
                             && npixel[point + 2] > avg - 15 && npixel[point + 2] < avg + 15)
                         {
-                            if (avg < 230)
+                            if (avg < 200)
                             {
                                 npixel[point] = 0;
                                 npixel[point + 1] = 0;
@@ -624,6 +625,21 @@ namespace Finder
             //sobelEdges.Save("sobel_" + count + ".png");
             pre_img = show_img;
             show_img = sobelImage.Bitmap;
+            rform.UpdateImage(show_img);
+        }
+
+        public static void GetCornersByHarris()
+        {
+            Image<Gray, Byte> image = new Image<Gray, Byte>(show_img);
+
+            HarrisDetector harris = new HarrisDetector();
+            harris.Detect(image);
+            List<Point> featurePoints = new List<Point>();
+            harris.GetCorners(featurePoints, 0.01);
+            harris.DrawFeaturePoints(image, featurePoints);
+
+            pre_img = show_img;
+            show_img = image.Bitmap;
             rform.UpdateImage(show_img);
         }
 
@@ -711,5 +727,119 @@ namespace Finder
             }
             #endregion
         }
+    }
+
+    class HarrisDetector
+    {
+        //32-bit float image of corner strength
+        private Image<Gray, float> _CornerStrength;
+        //32-bit float image of thresholded corners
+        private Image<Gray, float> _CornerTh;
+        //size of neighborhood for derivatives smoothing
+        int _Neighborhood;
+        //aperture for gradient computation
+        int _Aperture;
+        //Harris parameter
+        double _K;
+        //maximum strength for threshold computation
+        double _MaxStrength;
+        //calculated threshold (internal)
+        double _Threshold;
+
+        public HarrisDetector()
+        {
+            this._Neighborhood = 3;
+            this._Aperture = 3;
+            this._K = 0.01;
+            this._MaxStrength = 0.0;
+            this._Threshold = 0.01;
+        }
+
+        /// <summary>
+        /// Compute Harris corners
+        /// </summary>
+        /// <param name="image">source image</param>
+        public void Detect(Image<Gray, Byte> image)
+        {
+            this._CornerStrength = new Image<Gray, float>(image.Size);
+            //Harris computation
+            CvInvoke.CornerHarris(
+                image,                //source image
+                this._CornerStrength, //result image
+                this._Neighborhood,   //neighborhood size
+                this._Aperture,       //aperture size
+                this._K);             //Harris parameter
+
+            //internal threshold computation
+            double[] maxStrength;
+            double[] minStrength; //not used
+            Point[] minPoints;    //not used
+            Point[] maxPoints;    //not used
+            this._CornerStrength.MinMax(out minStrength, out maxStrength, out minPoints, out maxPoints);
+            this._MaxStrength = maxStrength[0];
+        }
+
+        /// <summary>
+        /// Get the corner map from computed Harris values
+        /// </summary>
+        /// <param name="qualityLevel">Harris values</param>
+        /// <returns>corner map</returns>
+        public Image<Gray, Byte> GetCornerMap(double qualityLevel)
+        {
+            Image<Gray, Byte> cornerMap;
+            //thresholding the corner strength
+            this._Threshold = qualityLevel * this._MaxStrength;
+            this._CornerTh = this._CornerStrength.ThresholdBinary(
+                new Gray(this._Threshold),
+                new Gray(255));
+            //convert to 8-bit image
+            cornerMap = this._CornerTh.Convert<Gray, Byte>();
+            return cornerMap;
+        }
+
+        /// <summary>
+        /// Get the feature points from the computed Harris value
+        /// </summary>
+        /// <param name="cornerPoints">feature points</param>
+        /// <param name="qualityLevel">Harris value</param>
+        public void GetCorners(List<Point> cornerPoints, double qualityLevel)
+        {
+            Image<Gray, Byte> cornerMap = GetCornerMap(qualityLevel);
+            GetCorners(cornerPoints, cornerMap);
+        }
+
+        //Get the feature points from the computed corner map
+        void GetCorners(List<Point> cornerPoints, Image<Gray, Byte> cornerMap)
+        {
+            //Interate over the pixels to obtain all features
+            for (int h = 0; h < cornerMap.Height; h++)
+            {
+                for (int w = 0; w < cornerMap.Width; w++)
+                {
+                    //if it is a feature point
+                    if (cornerMap[h, w].Intensity > 0)
+                    {
+                        cornerPoints.Add(new Point(w, h));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draw circles at feature point locations on an image
+        /// </summary>
+        /// <param name="image">image</param>
+        /// <param name="points">feature points</param>
+        public void DrawFeaturePoints(Image<Gray, Byte> image, List<Point> points)
+        {
+            //for all corner
+            foreach (Point point in points)
+            {
+                //draw a circle at each corner location
+                CircleF circle = new CircleF(new PointF(point.X, point.Y), 3);
+                image.Draw(circle, new Gray(255), 1);
+            }
+        }
+
     }
 }
